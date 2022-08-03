@@ -1,21 +1,16 @@
 /*
 Copyright (C) 1996-1997 Id Software, Inc.
-
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
 of the License, or (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
-
 See the GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
 */
 // common.c -- misc functions used in client and server
 
@@ -77,21 +72,13 @@ unsigned short pop[] =
 };
 
 /*
-
-
 All of Quake's data access is through a hierchal file system, but the contents of the file system can be transparently merged from several sources.
-
 The "base directory" is the path to the directory holding the quake.exe and all game directories.  The sys_* files pass this to host_init in quakeparms_t->basedir.  This can be overridden with the "-basedir" command line parm to allow code debugging in a different directory.  The base directory is
 only used during filesystem initialization.
-
 The "game directory" is the first tree on the search path and directory that all generated files (savegames, screenshots, demos, config files) will be saved to.  This can be overridden with the "-game" command line parameter.  The game directory can never be changed while quake is executing.  This is a precacution against having a malicious server instruct clients to write files over areas they shouldn't.
-
 The "cache directory" is only used during development to save network bandwidth, especially over ISDN / T1 lines.  If there is a cache directory
 specified, when a file is found by the normal search path, it will be mirrored
 into the cache directory, then opened there.
-
-
-
 FIXME:
 The file "parms.txt" will be read out of the game directory and appended to the current command line arguments to allow different games to initialize startup parms differently.  This could be used to add a "-sspeed 22050" for the high quality sound edition.  Because they are added at the end, they will not override an explicit setting on the original command line.
 	
@@ -129,9 +116,7 @@ void InsertLinkAfter (link_t *l, link_t *after)
 
 /*
 ============================================================================
-
 					LIBRARY REPLACEMENT FUNCTIONS
-
 ============================================================================
 */
 
@@ -425,11 +410,13 @@ float Q_atof (char *str)
 
 /*
 ============================================================================
-
 					BYTE ORDER FUNCTIONS
-
 ============================================================================
 */
+
+#ifdef SDL
+#include "SDL_byteorder.h"
+#endif
 
 qboolean        bigendien;
 
@@ -496,9 +483,7 @@ float FloatNoSwap (float f)
 
 /*
 ==============================================================================
-
 			MESSAGE IO FUNCTIONS
-
 Handles byte ordering and avoids alignment errors
 ==============================================================================
 */
@@ -862,7 +847,7 @@ void COM_FileBase (char *in, char *out)
 	while (s != in && *s != '.')
 		s--;
 	
-	for (s2 = s ; *s2 && *s2 != '/' ; s2--)
+	for (s2 = s ; s2 > in && *s2 != '/' ; s2--)
 	;
 	
 	if (s-s2 < 2)
@@ -904,7 +889,6 @@ void COM_DefaultExtension (char *path, char *extension)
 /*
 ==============
 COM_Parse
-
 Parse a token out of a string
 ==============
 */
@@ -982,7 +966,6 @@ skipwhite:
 /*
 ================
 COM_CheckParm
-
 Returns the position (1 to argc-1) in the program's argument list
 where the given parameter apears, or 0 if not present
 ================
@@ -1005,7 +988,6 @@ int COM_CheckParm (char *parm)
 /*
 ================
 COM_CheckRegistered
-
 Looks for the pop.txt file and verifies it.
 Sets the "registered" cvar.
 Immediately exits out if an alternate game was attempted to be started without
@@ -1018,7 +1000,7 @@ void COM_CheckRegistered (void)
 	unsigned short  check[128];
 	int                     i;
 
-	COM_OpenFile("gfx/pop.lmp", &h, false);
+	COM_OpenFile("gfx/pop.lmp", &h);
 	static_registered = 0;
 
 	if (h == -1)
@@ -1127,7 +1109,12 @@ void COM_Init (char *basedir)
 	byte    swaptest[2] = {1,0};
 
 // set the byte swapping variables in a portable manner 
+#ifdef SDL
+	// This is necessary because egcs 1.1.1 mis-compiles swaptest with -O2
+	if ( SDL_BYTEORDER == SDL_LIL_ENDIAN )
+#else
 	if ( *(short *)swaptest == 1)
+#endif
 	{
 		bigendien = false;
 		BigShort = ShortSwap;
@@ -1160,7 +1147,6 @@ void COM_Init (char *basedir)
 /*
 ============
 va
-
 does a varargs printf into a temp buffer, so I don't need to have
 varargs versions of all text functions.
 FIXME: make this buffer size safe someday
@@ -1192,9 +1178,7 @@ int     memsearch (byte *start, int count, int search)
 
 /*
 =============================================================================
-
 QUAKE FILESYSTEM
-
 =============================================================================
 */
 
@@ -1252,7 +1236,6 @@ searchpath_t    *com_searchpaths;
 /*
 ============
 COM_Path_f
-
 ============
 */
 void COM_Path_f (void)
@@ -1274,7 +1257,6 @@ void COM_Path_f (void)
 /*
 ============
 COM_WriteFile
-
 The filename will be prefixed by the current game directory
 ============
 */
@@ -1301,7 +1283,6 @@ void COM_WriteFile (char *filename, void *data, int len)
 /*
 ============
 COM_CreatePath
-
 Only used for CopyFile
 ============
 */
@@ -1324,7 +1305,6 @@ void    COM_CreatePath (char *path)
 /*
 ===========
 COM_CopyFile
-
 Copies a file over from the net to the local cache, creating any directories
 needed.  This is for the convenience of developers using ISDN from home.
 ===========
@@ -1356,14 +1336,12 @@ void COM_CopyFile (char *netpath, char *cachepath)
 
 /*
 ===========
-COM_OpenFile
-
-filename never has a leading slash, but may contain directory walks
-returns a handle and a length
-it may actually be inside a pak file
+COM_FindFile
+Finds the file in the search path.
+Sets com_filesize and one of handle or file
 ===========
 */
-int COM_OpenFile (char *filename, int *handle, qboolean reopen)
+int COM_FindFile (char *filename, int *handle, FILE **file)
 {
 	searchpath_t    *search;
 	char            netpath[MAX_OSPATH];
@@ -1372,8 +1350,10 @@ int COM_OpenFile (char *filename, int *handle, qboolean reopen)
 	int                     i;
 	int                     findtime, cachetime;
 
-	if (!handle)
-		Sys_Error ("COM_FindFile: *handle is NULL");
+	if (file && handle)
+		Sys_Error ("COM_FindFile: both handle and file set");
+	if (!file && !handle)
+		Sys_Error ("COM_FindFile: neither handle or file set");
 		
 //
 // search through the path, one element at a time
@@ -1396,11 +1376,17 @@ int COM_OpenFile (char *filename, int *handle, qboolean reopen)
 				if (!strcmp (pak->files[i].name, filename))
 				{       // found it!
 					Sys_Printf ("PackFile: %s : %s\n",pak->filename, filename);
-					if (reopen)
-						Sys_FileOpenRead(pak->filename, handle);
-					else
+					if (handle)
+					{
 						*handle = pak->handle;
-					Sys_FileSeek (*handle, pak->files[i].filepos);
+						Sys_FileSeek (pak->handle, pak->files[i].filepos);
+					}
+					else
+					{       // open a new file on the pakfile
+						*file = fopen (pak->filename, "rb");
+						if (*file)
+							fseek (*file, pak->files[i].filepos, SEEK_SET);
+					}
 					com_filesize = pak->files[i].filelen;
 					return com_filesize;
 				}
@@ -1431,7 +1417,7 @@ int COM_OpenFile (char *filename, int *handle, qboolean reopen)
 				else
 					sprintf (cachepath,"%s%s", com_cachedir, netpath+2);
 #else
-				sprintf (cachepath,"%s%s", com_cachedir, netpath);
+				sprintf (cachepath,"%s/%s", com_cachedir, netpath);
 #endif
 
 				cachetime = Sys_FileTime (cachepath);
@@ -1442,7 +1428,14 @@ int COM_OpenFile (char *filename, int *handle, qboolean reopen)
 			}	
 
 			Sys_Printf ("FindFile: %s\n",netpath);
-			com_filesize = Sys_FileOpenRead (netpath, handle);
+			com_filesize = Sys_FileOpenRead (netpath, &i);
+			if (handle)
+				*handle = i;
+			else
+			{
+				Sys_FileClose (i);
+				*file = fopen (netpath, "rb");
+			}
 			return com_filesize;
 		}
 		
@@ -1450,14 +1443,43 @@ int COM_OpenFile (char *filename, int *handle, qboolean reopen)
 	
 	Sys_Printf ("FindFile: can't find %s\n", filename);
 	
+	if (handle)
+		*handle = -1;
+	else
+		*file = NULL;
 	com_filesize = -1;
 	return -1;
+}
+
+
+/*
+===========
+COM_OpenFile
+filename never has a leading slash, but may contain directory walks
+returns a handle and a length
+it may actually be inside a pak file
+===========
+*/
+int COM_OpenFile (char *filename, int *handle)
+{
+	return COM_FindFile (filename, handle, NULL);
+}
+
+/*
+===========
+COM_FOpenFile
+If the requested file is inside a packfile, a new FILE * will be opened
+into the file.
+===========
+*/
+int COM_FOpenFile (char *filename, FILE **file)
+{
+	return COM_FindFile (filename, NULL, file);
 }
 
 /*
 ============
 COM_CloseFile
-
 If it is a pak file handle, don't really close it
 ============
 */
@@ -1476,7 +1498,6 @@ void COM_CloseFile (int h)
 /*
 ============
 COM_LoadFile
-
 Filename are reletive to the quake directory.
 Allways appends a 0 byte.
 ============
@@ -1494,7 +1515,7 @@ byte *COM_LoadFile (char *path, int usehunk)
 	buf = NULL;     // quiet compiler warning
 
 // look for it in the filesystem or pack files
-	len = COM_OpenFile (path, &h, false);
+	len = COM_OpenFile (path, &h);
 	if (h == -1)
 		return NULL;
 	
@@ -1563,9 +1584,7 @@ byte *COM_LoadStackFile (char *path, void *buffer, int bufsize)
 /*
 =================
 COM_LoadPackFile
-
 Takes an explicit (not game tree related) path to a pak file.
-
 Loads the header and directory, adding the files at the beginning
 of the list so they override previous pack files.
 =================
@@ -1581,9 +1600,10 @@ pack_t *COM_LoadPackFile (char *packfile)
 	dpackfile_t             info[MAX_FILES_IN_PACK];
 	unsigned short          crc;
 
+
 	if (Sys_FileOpenRead (packfile, &packhandle) == -1)
 	{
-//              Con_Printf ("Couldn't open %s\n", packfile);
+             Con_Printf ("Couldn't open %s\n", packfile);
 		return NULL;
 	}
 	Sys_FileRead (packhandle, (void *)&header, sizeof(header));
@@ -1605,7 +1625,6 @@ pack_t *COM_LoadPackFile (char *packfile)
 
 	Sys_FileSeek (packhandle, header.dirofs);
 	Sys_FileRead (packhandle, (void *)info, header.dirlen);
-
 // crc the directory to check for modifications
 	CRC_Init (&crc);
 	for (i=0 ; i<header.dirlen ; i++)
@@ -1635,7 +1654,6 @@ pack_t *COM_LoadPackFile (char *packfile)
 /*
 ================
 COM_AddGameDirectory
-
 Sets com_gamedir, adds the directory to the head of the path,
 then loads and adds pak1.pak pak2.pak ... 
 ================
@@ -1647,7 +1665,12 @@ void COM_AddGameDirectory (char *dir)
 	pack_t                  *pak;
 	char                    pakfile[MAX_OSPATH];
 
+
+	// printf("\n");
+	// printf("%s\n",dir);
+
 	strcpy (com_gamedir, dir);
+
 
 //
 // add the directory to the search path
@@ -1725,9 +1748,13 @@ void COM_InitFilesystem (void)
 	else
 		com_cachedir[0] = 0;
 
+	basedir[0] = '.';
+	basedir[1] = '/';
+	basedir[2] = '\0';
 //
 // start up with GAMENAME by default (id1)
 //
+	
 	COM_AddGameDirectory (va("%s/"GAMENAME, basedir) );
 
 	if (COM_CheckParm ("-rogue"))
@@ -1777,5 +1804,3 @@ void COM_InitFilesystem (void)
 	if (COM_CheckParm ("-proghack"))
 		proghack = true;
 }
-
-

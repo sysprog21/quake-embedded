@@ -391,6 +391,7 @@ void Con_Printf (char *fmt, ...)
 	if (con_debuglog)
 		Con_DebugLog(va("%s/qconsole.log",com_gamedir), "%s", msg);
 
+
 	if (!con_initialized)
 		return;
 		
@@ -412,6 +413,7 @@ void Con_Printf (char *fmt, ...)
 			inupdate = false;
 		}
 	}
+
 }
 
 /*

@@ -195,7 +195,7 @@ void R_ClearParticles (void)
 
 void R_ReadPointFile_f (void)
 {
-	int		f;
+	FILE	*f;
 	vec3_t	org;
 	int		r;
 	int		c;
@@ -204,8 +204,8 @@ void R_ReadPointFile_f (void)
 	
 	sprintf (name,"maps/%s.pts", sv.name);
 
-	COM_OpenFile (name, &f, true);
-	if (f < 0)
+	COM_FOpenFile (name, &f);
+	if (!f)
 	{
 		Con_Printf ("couldn't open %s\n", name);
 		return;
@@ -215,9 +215,7 @@ void R_ReadPointFile_f (void)
 	c = 0;
 	for ( ;; )
 	{
-		char buf[256];
-		Sys_File_gets (f, buf, 256);
-		r = sscanf (buf,"%f %f %f", &org[0], &org[1], &org[2]);
+		r = fscanf (f,"%f %f %f\n", &org[0], &org[1], &org[2]);
 		if (r != 3)
 			break;
 		c++;
@@ -239,9 +237,10 @@ void R_ReadPointFile_f (void)
 		VectorCopy (org, p->org);
 	}
 
-	Sys_FileClose (f);
+	fclose (f);
 	Con_Printf ("%i points read\n", c);
 }
+
 
 /*
 ===============

@@ -637,7 +637,6 @@ int CL_ReadFromServer (void)
 
 	cl.oldtime = cl.time;
 	cl.time += host_frametime;
-	
 	do
 	{
 		ret = CL_GetMessage ();
@@ -645,11 +644,9 @@ int CL_ReadFromServer (void)
 			Host_Error ("CL_ReadFromServer: lost server connection");
 		if (!ret)
 			break;
-		
 		cl.last_received_message = realtime;
 		CL_ParseServerMessage ();
 	} while (ret && cls.state == ca_connected);
-	
 	if (cl_shownet.value)
 		Con_Printf ("\n");
 

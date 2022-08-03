@@ -35,8 +35,6 @@ int Sys_FileRead (int handle, void *dest, int count);
 int Sys_FileWrite (int handle, void *data, int count);
 int	Sys_FileTime (char *path);
 void Sys_mkdir (char *path);
-void Sys_FileSync (int handle);
-void Sys_File_gets (int handle, char *buf, int len);
 
 //
 // memory protection
@@ -59,12 +57,6 @@ void _Sys_Printf(const char *fmt, ...);
 #endif
 
 #define Sys_Printf(msg, ...) _Sys_Printf(msg, ##__VA_ARGS__)
-#define Sys_Error(msg, ...) \
-do { \
-	_Sys_Printf(msg, ##__VA_ARGS__); \
-	Host_Shutdown(); \
-	exit(1); \
-} while(0)
 
 void Sys_Quit (void);
 
@@ -82,4 +74,7 @@ void Sys_SendKeyEvents (void);
 void Sys_LowFPPrecision (void);
 void Sys_HighFPPrecision (void);
 void Sys_SetFPCW (void);
+
+void Sys_Error (char *error, ...);
+// an error will cause the entire program to exit
 

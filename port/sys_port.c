@@ -59,6 +59,20 @@ void _Sys_Printf(const char *fmt, ...)
 }
 #endif
 
+void Sys_Error(char *error, ...)
+{ 
+	va_list argptr;
+	char string[1024];
+
+	va_start (argptr, error);
+	vsprintf (string, error, argptr);
+	va_end (argptr);
+	fprintf(stderr, "Error: %s\n", string);
+
+	Host_Shutdown ();
+	exit (1);
+}
+
 // =======================================================================
 // General routines
 // =======================================================================

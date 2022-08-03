@@ -209,10 +209,8 @@ Host_InitLocal
 void Host_InitLocal (void)
 {
 	Host_InitCommands ();
-	
 	Cvar_RegisterVariable (&host_framerate);
 	Cvar_RegisterVariable (&host_speeds);
-
 	Cvar_RegisterVariable (&sys_ticrate);
 	Cvar_RegisterVariable (&serverprofile);
 
@@ -637,8 +635,10 @@ void _Host_Frame (float time)
 	static double		time3 = 0;
 	int			pass1, pass2, pass3;
 
+
 	if (setjmp (host_abortserver) )
 		return;			// something bad happened, or the server disconnected
+
 
 // keep the random time dependent
 	rand ();
@@ -646,21 +646,28 @@ void _Host_Frame (float time)
 // decide the simulation time
 	if (!Host_FilterTime (time))
 		return;			// don't run too fast, or packets will flood out
+
 		
 // get new key events
 	Sys_SendKeyEvents ();
 
+
 // allow mice or other external controllers to add commands
 	IN_Commands ();
+
 
 // process console commands
 	Cbuf_Execute ();
 
+
 	NET_Poll();
+
+
 
 // if running the server locally, make intentions now
 	if (sv.active)
 		CL_SendCmd ();
+
 	
 //-------------------
 //
@@ -670,9 +677,12 @@ void _Host_Frame (float time)
 
 // check for commands typed to the host
 	Host_GetConsoleCommands ();
+
+
 	
 	if (sv.active)
 		Host_ServerFrame ();
+
 
 //-------------------
 //
@@ -685,6 +695,8 @@ void _Host_Frame (float time)
 	if (!sv.active)
 		CL_SendCmd ();
 
+
+
 	host_time += host_frametime;
 
 // fetch results from server
@@ -692,12 +704,13 @@ void _Host_Frame (float time)
 	{
 		CL_ReadFromServer ();
 	}
-
 // update video
 	if (host_speeds.value)
 		time1 = Sys_FloatTime ();
+
 		
 	SCR_UpdateScreen ();
+
 
 	if (host_speeds.value)
 		time2 = Sys_FloatTime ();
@@ -710,8 +723,10 @@ void _Host_Frame (float time)
 	}
 	else
 		S_Update (vec3_origin, vec3_origin, vec3_origin, vec3_origin);
+
 	
 	CDAudio_Update();
+
 
 	if (host_speeds.value)
 	{
@@ -733,6 +748,7 @@ void Host_Frame (float time)
 	static int		timecount;
 	int		i, c, m;
 
+
 	if (!serverprofile.value)
 	{
 		_Host_Frame (time);
@@ -743,6 +759,7 @@ void Host_Frame (float time)
 	_Host_Frame (time);
 	time2 = Sys_FloatTime ();	
 	
+
 	timetotal += time2 - time1;
 	timecount++;
 	
@@ -882,10 +899,13 @@ void Host_Init (quakeparms_t *parms)
 		if (!host_colormap)
 			Sys_Error ("Couldn't load gfx/colormap.lmp");
 
+		printf("from here\n");
+
 #ifndef _WIN32 // on non win32, mouse comes before video for security reasons
 		IN_Init ();
 #endif
 		VID_Init (host_basepal);
+
 
 		Draw_Init ();
 		SCR_Init ();
