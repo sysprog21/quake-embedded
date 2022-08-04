@@ -102,7 +102,7 @@ void Sys_SendKeyEvents(void)
 {
 	key_event_t e;
 	while (qembd_dequeue_key_event(&e) == 0)
-		Key_Event(e.code, e.down == 1);
+		Key_Event(e.keycode, e.state == 1);
 }
 
 void Sys_HighFPPrecision(void)

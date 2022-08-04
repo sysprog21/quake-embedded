@@ -32,39 +32,22 @@ void IN_Commands(void)
 
 void IN_Move(usercmd_t *cmd)
 {
-	int mouse_x, mouse_y;
-	mouse_position_t position;
+	mouse_movement_t movement;
 	int r;
 
-	r = qembd_get_current_position(&position);
+	r = qembd_get_mouse_movement(&movement);
 	if (r != 0)
 		return;
 
-	mouse_x = position.x - (qembd_get_width() / 2);
-	mouse_y = position.y - (qembd_get_height() / 2);
+	movement.x *= sensitivity.value;
+	movement.y *= sensitivity.value;
 
-	mouse_x *= sensitivity.value;
-	mouse_y *= sensitivity.value;
-
-	if ((in_strafe.state & 1) || (lookstrafe.value && (in_mlook.state & 1)))
-		cmd->sidemove += m_side.value * mouse_x;
-	else
-		cl.viewangles[YAW] -= m_yaw.value * mouse_x;
-
-	if (in_mlook.state & 1)
-		V_StopPitchDrift();
-
-	if ((in_mlook.state & 1) && !(in_strafe.state & 1)) {
-		cl.viewangles[PITCH] += m_pitch.value * mouse_y;
-		if (cl.viewangles[PITCH] > 80)
-			cl.viewangles[PITCH] = 80;
-		if (cl.viewangles[PITCH] < -70)
-			cl.viewangles[PITCH] = -70;
-	} else {
-		if ((in_strafe.state & 1) && noclip_anglehack)
-			cmd->upmove -= m_forward.value * mouse_y;
-		else
-			cmd->forwardmove -= m_forward.value * mouse_y;
-	}
+	V_StopPitchDrift();
+	cl.viewangles[YAW] -= m_yaw.value * movement.x;
+	cl.viewangles[PITCH] += m_pitch.value * movement.y;
+	if (cl.viewangles[PITCH] > 80)
+		cl.viewangles[PITCH] = 80;
+	if (cl.viewangles[PITCH] < -70)
+		cl.viewangles[PITCH] = -70;
 }
 

@@ -46,7 +46,7 @@ void qembd_vidinit()
 	register int a7 asm("a7") = syscall_draw_frame;
 
 	asm volatile("scall"
-	             : "r+"(a0) : "r"(a1), "r"(a2), "r"(a7));
+	             : "+r"(a0) : "r"(a1), "r"(a2), "r"(a7));
 }
 
 void qembd_fillrect(uint8_t *src, uint32_t *clut,
@@ -67,5 +67,5 @@ void qembd_refresh()
 	register int a7 asm("a7") = syscall_draw_frame;
 
 	asm volatile("scall"
-	             : "r+"(a0) : "r"(a1), "r"(a2), "r"(a7));
+	             : "+r"(a0) : "r"(a1), "r"(a2), "r"(a7));
 }
