@@ -68,25 +68,6 @@ if(CMAKE_SYSTEM_NAME MATCHES "(Darwin|Linux)")
 		net_udp.c
 		net_bsd.c
 	)
-#	set(WQ_ASM_SRCS
-#		x86/d_draw.s
-#		x86/d_draw16.s
-#		x86/d_parta.s
-#		x86/d_polysa.s
-#		x86/d_scana.s
-#		x86/d_spr8.s
-#		x86/d_varsa.s
-#		x86/math.s
-#		x86/r_aliasa.s
-#		x86/r_drawa.s
-#		x86/r_edgea.s
-#		x86/r_varsa.s
-#		x86/surf16.s
-#		x86/surf8.s
-#		x86/worlda.s
-#		x86/r_aclipa.s
-#	)
-#	set_source_files_properties(${WQ_ASM_SRCS} PROPERTIES COMPILE_FLAGS "${CFLAGS} -DELF -x assembler-with-cpp")
 else()
 	list(APPEND WQ_SRCS
 		net_none.c
