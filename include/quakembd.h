@@ -53,14 +53,19 @@
 #define bail(msg) { qembd_error(msg); goto bail; }
 
 typedef struct {
-	uint8_t code;
-	uint8_t down;
+	uint32_t keycode;
+	uint8_t state;
 } key_event_t;
 
 typedef struct {
-	int x;
-	int y;
-} mouse_position_t;
+	int32_t xrel;
+	int32_t yrel;
+} mouse_motion_t;
+
+typedef struct {
+	int32_t x;
+	int32_t y;
+} mouse_movement_t;
 
 int qembd_get_width();
 int qembd_get_height();
@@ -72,6 +77,6 @@ void qembd_udelay(uint32_t us);
 void *qembd_allocmain(size_t size);
 int qembd_main(int c, char **v);
 int qembd_dequeue_key_event(key_event_t *e);
-int qembd_get_current_position(mouse_position_t *position);
+int qembd_get_mouse_movement(mouse_movement_t *movement);
 
 #endif /* __QUAKEMBD_H */
