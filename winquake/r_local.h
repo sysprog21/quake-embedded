@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef GLQUAKE
 #include "r_shared.h"
 
-#define ALIAS_BASE_SIZE_RATIO		(1.0 / 11.0)
+#define ALIAS_BASE_SIZE_RATIO		(1.0f / 11.0f)
 					// normalizing factor so player model works out to about
 					//  1 pixel per triangle
 
@@ -72,12 +72,12 @@ extern cvar_t	r_reportedgeout;
 extern cvar_t	r_maxedges;
 extern cvar_t	r_numedges;
 
-#define XCENTERING	(1.0 / 2.0)
-#define YCENTERING	(1.0 / 2.0)
+#define XCENTERING	(1.0f / 2.0f)
+#define YCENTERING	(1.0f / 2.0f)
 
-#define CLIP_EPSILON		0.001
+#define CLIP_EPSILON		0.001f
 
-#define BACKFACE_EPSILON	0.01
+#define BACKFACE_EPSILON	0.01f
 
 //===========================================================================
 
@@ -184,7 +184,7 @@ extern	model_t		*cl_worldmodel;
 extern int		*pfrustum_indexes[4];
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
-#define	NEAR_CLIP	0.01
+#define	NEAR_CLIP	0.01f
 
 extern int			ubasestep, errorterm, erroradjustup, erroradjustdown;
 extern int			vstartscan;

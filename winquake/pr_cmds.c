@@ -155,12 +155,12 @@ void SetMinMaxSize (edict_t *e, float *min, float *max, qboolean rotate)
 	// find min / max for rotations
 		angles = e->v.angles;
 		
-		a = angles[1]/180 * M_PI;
+		a = angles[1] * (M_PI/180.0f);
 		
-		xvector[0] = cos(a);
-		xvector[1] = sin(a);
-		yvector[0] = -sin(a);
-		yvector[1] = cos(a);
+		xvector[0] = cosf(a);
+		xvector[1] = sinf(a);
+		yvector[0] = -sinf(a);
+		yvector[1] = cosf(a);
 		
 		VectorCopy (min, bounds[0]);
 		VectorCopy (max, bounds[1]);
@@ -356,7 +356,7 @@ void PF_normalize (void)
 	value1 = G_VECTOR(OFS_PARM0);
 
 	new = value1[0] * value1[0] + value1[1] * value1[1] + value1[2]*value1[2];
-	new = sqrt(new);
+	new = sqrtf(new);
 	
 	if (new == 0)
 		newvalue[0] = newvalue[1] = newvalue[2] = 0;
@@ -386,7 +386,7 @@ void PF_vlen (void)
 	value1 = G_VECTOR(OFS_PARM0);
 
 	new = value1[0] * value1[0] + value1[1] * value1[1] + value1[2]*value1[2];
-	new = sqrt(new);
+	new = sqrtf(new);
 	
 	G_FLOAT(OFS_RETURN) = new;
 }
@@ -409,7 +409,7 @@ void PF_vectoyaw (void)
 		yaw = 0;
 	else
 	{
-		yaw = (int) (atan2(value1[1], value1[0]) * 180 / M_PI);
+		yaw = (int) (atan2f(value1[1], value1[0]) * (180.0f / M_PI));
 		if (yaw < 0)
 			yaw += 360;
 	}
@@ -443,12 +443,12 @@ void PF_vectoangles (void)
 	}
 	else
 	{
-		yaw = (int) (atan2(value1[1], value1[0]) * 180 / M_PI);
+		yaw = (int) (atan2f(value1[1], value1[0]) * (180.0f / M_PI));
 		if (yaw < 0)
 			yaw += 360;
 
-		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
-		pitch = (int) (atan2(value1[2], forward) * 180 / M_PI);
+		forward = sqrtf (value1[0]*value1[0] + value1[1]*value1[1]);
+		pitch = (int) (atan2f(value1[2], forward) * (180.0f / M_PI));
 		if (pitch < 0)
 			pitch += 360;
 	}
@@ -898,7 +898,7 @@ void PF_findradius (void)
 		if (ent->v.solid == SOLID_NOT)
 			continue;
 		for (j=0 ; j<3 ; j++)
-			eorg[j] = org[j] - (ent->v.origin[j] + (ent->v.mins[j] + ent->v.maxs[j])*0.5);			
+			eorg[j] = org[j] - (ent->v.origin[j] + (ent->v.mins[j] + ent->v.maxs[j])*0.5f);
 		if (Length(eorg) > rad)
 			continue;
 			
@@ -938,7 +938,7 @@ void PF_fabs (void)
 {
 	float	v;
 	v = G_FLOAT(OFS_PARM0);
-	G_FLOAT(OFS_RETURN) = fabs(v);
+	G_FLOAT(OFS_RETURN) = fabsf(v);
 }
 
 void PF_vtos (void)
@@ -1163,8 +1163,8 @@ void PF_walkmove (void)
 
 	yaw = yaw*M_PI*2 / 360;
 	
-	move[0] = cos(yaw)*dist;
-	move[1] = sin(yaw)*dist;
+	move[0] = cosf(yaw)*dist;
+	move[1] = sinf(yaw)*dist;
 	move[2] = 0;
 
 // save program state, because SV_movestep may call other progs
@@ -1249,17 +1249,17 @@ void PF_rint (void)
 	float	f;
 	f = G_FLOAT(OFS_PARM0);
 	if (f > 0)
-		G_FLOAT(OFS_RETURN) = (int)(f + 0.5);
+		G_FLOAT(OFS_RETURN) = (int)(f + 0.5f);
 	else
-		G_FLOAT(OFS_RETURN) = (int)(f - 0.5);
+		G_FLOAT(OFS_RETURN) = (int)(f - 0.5f);
 }
 void PF_floor (void)
 {
-	G_FLOAT(OFS_RETURN) = floor(G_FLOAT(OFS_PARM0));
+	G_FLOAT(OFS_RETURN) = floorf(G_FLOAT(OFS_PARM0));
 }
 void PF_ceil (void)
 {
-	G_FLOAT(OFS_RETURN) = ceil(G_FLOAT(OFS_PARM0));
+	G_FLOAT(OFS_RETURN) = ceilf(G_FLOAT(OFS_PARM0));
 }
 
 
@@ -1373,7 +1373,7 @@ void PF_aim (void)
 			continue;	// don't aim at teammate
 		for (j=0 ; j<3 ; j++)
 			end[j] = check->v.origin[j]
-			+ 0.5*(check->v.mins[j] + check->v.maxs[j]);
+			+ 0.5f*(check->v.mins[j] + check->v.maxs[j]);
 		VectorSubtract (end, start, dir);
 		VectorNormalize (dir);
 		dist = DotProduct (dir, pr_global_struct->v_forward);

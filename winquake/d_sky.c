@@ -32,7 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 D_Sky_uv_To_st
 =================
 */
-void D_Sky_uv_To_st (int u, int v, fixed16_t *s, fixed16_t *t)
+static void D_Sky_uv_To_st (int u, int v, fixed16_t *s, fixed16_t *t)
 {
 	float	wu, wv, temp;
 	vec3_t	end;
@@ -42,8 +42,8 @@ void D_Sky_uv_To_st (int u, int v, fixed16_t *s, fixed16_t *t)
 	else
 		temp = (float)r_refdef.vrect.height;
 
-	wu = 8192.0 * (float)(u-((int)vid.width>>1)) / temp;
-	wv = 8192.0 * (float)(((int)vid.height>>1)-v) / temp;
+	wu = 8192.0f * (float)(u-((int)vid.width>>1)) / temp;
+	wv = 8192.0f * (float)(((int)vid.height>>1)-v) / temp;
 
 	end[0] = 4096*vpn[0] + wu*vright[0] + wv*vup[0];
 	end[1] = 4096*vpn[1] + wu*vright[1] + wv*vup[1];

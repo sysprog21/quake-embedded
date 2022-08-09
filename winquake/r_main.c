@@ -34,7 +34,7 @@ qboolean	r_drawculledpolys;
 qboolean	r_worldpolysbacktofront;
 qboolean	r_recursiveaffinetriangles = true;
 int			r_pixbytes = 1;
-float		r_aliasuvscale = 1.0;
+float		r_aliasuvscale = 1.0f;
 int			r_outofsurfaces;
 int			r_outofedges;
 
@@ -324,7 +324,7 @@ void R_SetVrect (vrect_t *pvrectin, vrect_t *pvrect, int lineadj)
 	pvrect->width = pvrectin->width * size;
 	if (pvrect->width < 96)
 	{
-		size = 96.0 / pvrectin->width;
+		size = 96.0f / pvrectin->width;
 		pvrect->width = 96;	// min for icons
 	}
 	pvrect->width &= ~7;
@@ -364,20 +364,20 @@ void R_ViewChanged (vrect_t *pvrect, int lineadj, float aspect)
 
 	R_SetVrect (pvrect, &r_refdef.vrect, lineadj);
 
-	r_refdef.horizontalFieldOfView = 2.0 * tan (r_refdef.fov_x/360*M_PI);
+	r_refdef.horizontalFieldOfView = 2.0f * tanf (r_refdef.fov_x * (M_PI/360.0f));
 	r_refdef.fvrectx = (float)r_refdef.vrect.x;
-	r_refdef.fvrectx_adj = (float)r_refdef.vrect.x - 0.5;
+	r_refdef.fvrectx_adj = (float)r_refdef.vrect.x - 0.5f;
 	r_refdef.vrect_x_adj_shift20 = (r_refdef.vrect.x<<20) + (1<<19) - 1;
 	r_refdef.fvrecty = (float)r_refdef.vrect.y;
-	r_refdef.fvrecty_adj = (float)r_refdef.vrect.y - 0.5;
+	r_refdef.fvrecty_adj = (float)r_refdef.vrect.y - 0.5f;
 	r_refdef.vrectright = r_refdef.vrect.x + r_refdef.vrect.width;
 	r_refdef.vrectright_adj_shift20 = (r_refdef.vrectright<<20) + (1<<19) - 1;
 	r_refdef.fvrectright = (float)r_refdef.vrectright;
-	r_refdef.fvrectright_adj = (float)r_refdef.vrectright - 0.5;
-	r_refdef.vrectrightedge = (float)r_refdef.vrectright - 0.99;
+	r_refdef.fvrectright_adj = (float)r_refdef.vrectright - 0.5f;
+	r_refdef.vrectrightedge = (float)r_refdef.vrectright - 0.99f;
 	r_refdef.vrectbottom = r_refdef.vrect.y + r_refdef.vrect.height;
 	r_refdef.fvrectbottom = (float)r_refdef.vrectbottom;
-	r_refdef.fvrectbottom_adj = (float)r_refdef.vrectbottom - 0.5;
+	r_refdef.fvrectbottom_adj = (float)r_refdef.vrectbottom - 0.5f;
 
 	r_refdef.aliasvrect.x = (int)(r_refdef.vrect.x * r_aliasuvscale);
 	r_refdef.aliasvrect.y = (int)(r_refdef.vrect.y * r_aliasuvscale);
@@ -407,56 +407,56 @@ void R_ViewChanged (vrect_t *pvrect, int lineadj, float aspect)
 // but will definately render in the [range] row and column, so adjust the
 // buffer origin to get an exact edge to edge fill
 	xcenter = ((float)r_refdef.vrect.width * XCENTERING) +
-			r_refdef.vrect.x - 0.5;
+			r_refdef.vrect.x - 0.5f;
 	aliasxcenter = xcenter * r_aliasuvscale;
 	ycenter = ((float)r_refdef.vrect.height * YCENTERING) +
-			r_refdef.vrect.y - 0.5;
+			r_refdef.vrect.y - 0.5f;
 	aliasycenter = ycenter * r_aliasuvscale;
 
 	xscale = r_refdef.vrect.width / r_refdef.horizontalFieldOfView;
 	aliasxscale = xscale * r_aliasuvscale;
-	xscaleinv = 1.0 / xscale;
+	xscaleinv = 1.0f / xscale;
 	yscale = xscale * pixelAspect;
 	aliasyscale = yscale * r_aliasuvscale;
-	yscaleinv = 1.0 / yscale;
+	yscaleinv = 1.0f / yscale;
 	xscaleshrink = (r_refdef.vrect.width-6)/r_refdef.horizontalFieldOfView;
 	yscaleshrink = xscaleshrink*pixelAspect;
 
 // left side clip
-	screenedge[0].normal[0] = -1.0 / (xOrigin*r_refdef.horizontalFieldOfView);
+	screenedge[0].normal[0] = -1.0f / (xOrigin*r_refdef.horizontalFieldOfView);
 	screenedge[0].normal[1] = 0;
 	screenedge[0].normal[2] = 1;
 	screenedge[0].type = PLANE_ANYZ;
 	
 // right side clip
 	screenedge[1].normal[0] =
-			1.0 / ((1.0-xOrigin)*r_refdef.horizontalFieldOfView);
+			1.0f / ((1.0f-xOrigin)*r_refdef.horizontalFieldOfView);
 	screenedge[1].normal[1] = 0;
 	screenedge[1].normal[2] = 1;
 	screenedge[1].type = PLANE_ANYZ;
 	
 // top side clip
 	screenedge[2].normal[0] = 0;
-	screenedge[2].normal[1] = -1.0 / (yOrigin*verticalFieldOfView);
+	screenedge[2].normal[1] = -1.0f / (yOrigin*verticalFieldOfView);
 	screenedge[2].normal[2] = 1;
 	screenedge[2].type = PLANE_ANYZ;
 	
 // bottom side clip
 	screenedge[3].normal[0] = 0;
-	screenedge[3].normal[1] = 1.0 / ((1.0-yOrigin)*verticalFieldOfView);
+	screenedge[3].normal[1] = 1.0f / ((1.0f-yOrigin)*verticalFieldOfView);
 	screenedge[3].normal[2] = 1;	
 	screenedge[3].type = PLANE_ANYZ;
 	
 	for (i=0 ; i<4 ; i++)
 		VectorNormalize (screenedge[i].normal);
 
-	res_scale = sqrt ((double)(r_refdef.vrect.width * r_refdef.vrect.height) /
-			          (320.0 * 152.0)) *
-			(2.0 / r_refdef.horizontalFieldOfView);
+	res_scale = sqrtf ((float)(r_refdef.vrect.width * r_refdef.vrect.height) /
+					  (320.0f * 152.0f)) *
+			(2.0f / r_refdef.horizontalFieldOfView);
 	r_aliastransition = r_aliastransbase.value * res_scale;
 	r_resfudge = r_aliastransadj.value * res_scale;
 
-	if (scr_fov.value <= 90.0)
+	if (scr_fov.value <= 90.0f)
 		r_fov_greater_than_90 = false;
 	else
 		r_fov_greater_than_90 = true;
@@ -576,7 +576,7 @@ void R_DrawEntitiesOnList (void)
 										dist);
 						add = cl_dlights[lnum].radius - Length(dist);
 	
-						if (add > 0)
+						if (add > 0.0f)
 							lighting.ambientlight += add;
 					}
 				}
@@ -681,7 +681,7 @@ int R_BmodelCheckBBox (model_t *clmodel, float *minmaxs)
 {
 	int			i, *pindex, clipflags;
 	vec3_t		acceptpt, rejectpt;
-	double		d;
+	float		d;
 
 	clipflags = 0;
 
@@ -717,7 +717,7 @@ int R_BmodelCheckBBox (model_t *clmodel, float *minmaxs)
 			d = DotProduct (rejectpt, view_clipplanes[i].normal);
 			d -= view_clipplanes[i].dist;
 
-			if (d <= 0)
+			if (d <= 0.0f)
 				return BMODEL_FULLY_CLIPPED;
 
 			acceptpt[0] = minmaxs[pindex[3+0]];
@@ -727,7 +727,7 @@ int R_BmodelCheckBBox (model_t *clmodel, float *minmaxs)
 			d = DotProduct (acceptpt, view_clipplanes[i].normal);
 			d -= view_clipplanes[i].dist;
 
-			if (d <= 0)
+			if (d <= 0.0f)
 				clipflags |= (1<<i);
 		}
 	}
@@ -1078,8 +1078,8 @@ void R_InitTurb (void)
 	
 	for (i=0 ; i<(SIN_BUFFER_SIZE) ; i++)
 	{
-		sintable[i] = AMP + sin(i*3.14159*2/CYCLE)*AMP;
-		intsintable[i] = AMP2 + sin(i*3.14159*2/CYCLE)*AMP2;	// AMP2, not 20
+		sintable[i] = AMP + sinf(i*3.14159f*2.0f/CYCLE)*AMP;
+		intsintable[i] = AMP2 + sinf(i*3.14159f*2.0f/CYCLE)*AMP2;	// AMP2, not 20
 	}
 }
 

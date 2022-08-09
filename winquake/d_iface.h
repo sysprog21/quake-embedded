@@ -49,7 +49,7 @@ typedef struct particle_s
 	ptype_t		type;
 } particle_t;
 
-#define PARTICLE_Z_CLIP	8.0
+#define PARTICLE_Z_CLIP	8.0f
 
 typedef struct polyvert_s {
 	float	u, v, zi, s, t;

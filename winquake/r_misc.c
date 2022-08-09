@@ -78,7 +78,7 @@ void R_TimeRefresh_f (void)
 	start = Sys_FloatTime ();
 	for (i=0 ; i<128 ; i++)
 	{
-		r_refdef.viewangles[1] = i/128.0*360.0;
+		r_refdef.viewangles[1] = i*(360.0f/128.0f);
 
 		VID_LockBuffer ();
 
@@ -157,7 +157,7 @@ void R_TimeGraph (void)
 	
 	r_time2 = Sys_FloatTime ();
 
-	a = (r_time2-r_time1)/0.01;
+	a = (r_time2-r_time1)/0.01f;
 //a = fabs(mouse_y * 0.05);
 //a = (int)((r_refdef.vieworg[2] + 1024)/1)%(int)r_graphheight.value;
 //a = fabs(velocity[0])/20;
@@ -290,23 +290,6 @@ void R_TransformFrustum (void)
 		view_clipplanes[i].dist = DotProduct (modelorg, v2);
 	}
 }
-
-
-#if	!id386
-
-/*
-================
-TransformVector
-================
-*/
-void TransformVector (vec3_t in, vec3_t out)
-{
-	out[0] = DotProduct(in,vright);
-	out[1] = DotProduct(in,vup);
-	out[2] = DotProduct(in,vpn);		
-}
-
-#endif
 
 
 /*

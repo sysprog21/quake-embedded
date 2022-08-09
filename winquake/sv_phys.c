@@ -384,9 +384,9 @@ void SV_AddGravity (edict_t *ent)
 	if (val && val->_float)
 		ent_gravity = val->_float;
 	else
-		ent_gravity = 1.0;
+		ent_gravity = 1.0f;
 #endif
-	ent->v.velocity[2] -= ent_gravity * sv_gravity.value * host_frametime;
+	ent->v.velocity[2] -= ent_gravity * sv_gravity.value * (float)host_frametime;
 }
 
 
@@ -827,7 +827,7 @@ qboolean SV_CheckWater (edict_t *ent)
 #endif
 		ent->v.watertype = cont;
 		ent->v.waterlevel = 1;
-		point[2] = ent->v.origin[2] + (ent->v.mins[2] + ent->v.maxs[2])*0.5;
+		point[2] = ent->v.origin[2] + (ent->v.mins[2] + ent->v.maxs[2])*0.5f;
 		cont = SV_PointContents (point);
 		if (cont <= CONTENTS_WATER)
 		{
@@ -873,7 +873,7 @@ void SV_WallFriction (edict_t *ent, trace_t *trace)
 	AngleVectors (ent->v.v_angle, forward, right, up);
 	d = DotProduct (trace->plane.normal, forward);
 	
-	d += 0.5;
+	d += 0.5f;
 	if (d >= 0)
 		return;
 		
@@ -930,10 +930,10 @@ int SV_TryUnstick (edict_t *ent, vec3_t oldvel)
 		ent->v.velocity[0] = oldvel[0];
 		ent->v. velocity[1] = oldvel[1];
 		ent->v. velocity[2] = 0;
-		clip = SV_FlyMove (ent, 0.1, &steptrace);
+		clip = SV_FlyMove (ent, 0.1f, &steptrace);
 
-		if ( fabs(oldorg[1] - ent->v.origin[1]) > 4
-		|| fabs(oldorg[0] - ent->v.origin[0]) > 4 )
+		if ( fabsf(oldorg[1] - ent->v.origin[1]) > 4
+		|| fabsf(oldorg[0] - ent->v.origin[0]) > 4 )
 		{
 //Con_DPrintf ("unstuck!\n");
 			return clip;
@@ -963,6 +963,8 @@ void SV_WalkMove (edict_t *ent)
 	int			clip;
 	int			oldonground;
 	trace_t		steptrace, downtrace;
+
+	float _host_frametime = (float)host_frametime;
 	
 //
 // do a regular slide move unless it looks like you ran into a step
@@ -973,7 +975,7 @@ void SV_WalkMove (edict_t *ent)
 	VectorCopy (ent->v.origin, oldorg);
 	VectorCopy (ent->v.velocity, oldvel);
 	
-	clip = SV_FlyMove (ent, host_frametime, &steptrace);
+	clip = SV_FlyMove (ent, _host_frametime, &steptrace);
 
 	if ( !(clip & 2) )
 		return;		// move didn't block on a step
@@ -1001,7 +1003,7 @@ void SV_WalkMove (edict_t *ent)
 	VectorCopy (vec3_origin, upmove);
 	VectorCopy (vec3_origin, downmove);
 	upmove[2] = STEPSIZE;
-	downmove[2] = -STEPSIZE + oldvel[2]*host_frametime;
+	downmove[2] = -STEPSIZE + oldvel[2]*_host_frametime;
 
 // move up
 	SV_PushEntity (ent, upmove);	// FIXME: don't link?
@@ -1010,14 +1012,14 @@ void SV_WalkMove (edict_t *ent)
 	ent->v.velocity[0] = oldvel[0];
 	ent->v. velocity[1] = oldvel[1];
 	ent->v. velocity[2] = 0;
-	clip = SV_FlyMove (ent, host_frametime, &steptrace);
+	clip = SV_FlyMove (ent, _host_frametime, &steptrace);
 
 // check for stuckness, possibly due to the limited precision of floats
 // in the clipping hulls
 	if (clip)
 	{
-		if ( fabs(oldorg[1] - ent->v.origin[1]) < 0.03125
-		&& fabs(oldorg[0] - ent->v.origin[0]) < 0.03125 )
+		if ( fabsf(oldorg[1] - ent->v.origin[1]) < 0.03125f
+		&& fabsf(oldorg[0] - ent->v.origin[0]) < 0.03125f )
 		{	// stepping up didn't make any progress
 			clip = SV_TryUnstick (ent, oldvel);
 		}
@@ -1030,7 +1032,7 @@ void SV_WalkMove (edict_t *ent)
 // move down
 	downtrace = SV_PushEntity (ent, downmove);	// FIXME: don't link?
 
-	if (downtrace.plane.normal[2] > 0.7)
+	if (downtrace.plane.normal[2] > 0.7f)
 	{
 		if (ent->v.solid == SOLID_BSP)
 		{
@@ -1310,7 +1312,7 @@ void SV_Physics_Toss (edict_t *ent)
 		return;
 	
 	if (ent->v.movetype == MOVETYPE_BOUNCE)
-		backoff = 1.5;
+		backoff = 1.5f;
 #ifdef QUAKE2
 	else if (ent->v.movetype == MOVETYPE_BOUNCEMISSILE)
 		backoff = 2.0;
@@ -1321,7 +1323,7 @@ void SV_Physics_Toss (edict_t *ent)
 	ClipVelocity (ent->v.velocity, trace.plane.normal, ent->v.velocity, backoff);
 
 // stop if on ground
-	if (trace.plane.normal[2] > 0.7)
+	if (trace.plane.normal[2] > 0.7f)
 	{		
 #ifdef QUAKE2
 		if (ent->v.velocity[2] < 60 || (ent->v.movetype != MOVETYPE_BOUNCE && ent->v.movetype != MOVETYPE_BOUNCEMISSILE))
@@ -1472,7 +1474,7 @@ void SV_Physics_Step (edict_t *ent)
 // freefall if not onground
 	if ( ! ((int)ent->v.flags & (FL_ONGROUND | FL_FLY | FL_SWIM) ) )
 	{
-		if (ent->v.velocity[2] < sv_gravity.value*-0.1)
+		if (ent->v.velocity[2] < sv_gravity.value*-0.1f)
 			hitsound = true;
 		else
 			hitsound = false;

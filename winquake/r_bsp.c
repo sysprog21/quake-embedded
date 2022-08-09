@@ -86,10 +86,10 @@ void R_RotateBmodel (void)
 // TODO: share work with R_SetUpAliasTransform
 
 // yaw
-	angle = currententity->angles[YAW];		
-	angle = angle * M_PI*2 / 360;
-	s = sin(angle);
-	c = cos(angle);
+	angle = currententity->angles[YAW];
+	angle = angle * (M_PI/180.0f);
+	s = sinf(angle);
+	c = cosf(angle);
 
 	temp1[0][0] = c;
 	temp1[0][1] = s;
@@ -104,9 +104,9 @@ void R_RotateBmodel (void)
 
 // pitch
 	angle = currententity->angles[PITCH];		
-	angle = angle * M_PI*2 / 360;
-	s = sin(angle);
-	c = cos(angle);
+	angle = angle * (M_PI/180.0f);
+	s = sinf(angle);
+	c = cosf(angle);
 
 	temp2[0][0] = c;
 	temp2[0][1] = 0;
@@ -122,9 +122,9 @@ void R_RotateBmodel (void)
 
 // roll
 	angle = currententity->angles[ROLL];		
-	angle = angle * M_PI*2 / 360;
-	s = sin(angle);
-	c = cos(angle);
+	angle = angle * (M_PI/180.0f);
+	s = sinf(angle);
+	c = cosf(angle);
 
 	temp1[0][0] = 1;
 	temp1[0][1] = 0;
@@ -452,7 +452,7 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 	mplane_t	*plane;
 	msurface_t	*surf, **mark;
 	mleaf_t		*pleaf;
-	double		d, dot;
+	float		d, dot;
 
 	if (node->contents == CONTENTS_SOLID)
 		return;		// solid

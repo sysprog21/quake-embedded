@@ -62,9 +62,9 @@ void SV_SetIdealPitch (void)
 	if (!((int)sv_player->v.flags & FL_ONGROUND))
 		return;
 		
-	angleval = sv_player->v.angles[YAW] * M_PI*2 / 360;
-	sinval = sin(angleval);
-	cosval = cos(angleval);
+	angleval = sv_player->v.angles[YAW] * (M_PI/180.0f);
+	sinval = sinf(angleval);
+	cosval = cosf(angleval);
 
 	for (i=0 ; i<MAX_FORWARD ; i++)
 	{
@@ -129,7 +129,7 @@ void SV_UserFriction (void)
 	
 	vel = velocity;
 	
-	speed = sqrt(vel[0]*vel[0] +vel[1]*vel[1]);
+	speed = sqrtf(vel[0]*vel[0] +vel[1]*vel[1]);
 	if (!speed)
 		return;
 
@@ -141,14 +141,14 @@ void SV_UserFriction (void)
 
 	trace = SV_Move (start, vec3_origin, vec3_origin, stop, true, sv_player);
 
-	if (trace.fraction == 1.0)
+	if (trace.fraction == 1.0f)
 		friction = sv_friction.value*sv_edgefriction.value;
 	else
 		friction = sv_friction.value;
 
 // apply friction	
 	control = speed < sv_stopspeed.value ? sv_stopspeed.value : speed;
-	newspeed = speed - host_frametime*control*friction;
+	newspeed = speed - ((float)host_frametime)*control*friction;
 	
 	if (newspeed < 0)
 		newspeed = 0;
@@ -196,7 +196,7 @@ void SV_Accelerate (void)
 	addspeed = wishspeed - currentspeed;
 	if (addspeed <= 0)
 		return;
-	accelspeed = sv_accelerate.value*host_frametime*wishspeed;
+	accelspeed = sv_accelerate.value*((float)host_frametime)*wishspeed;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
 	
@@ -217,7 +217,7 @@ void SV_AirAccelerate (vec3_t wishveloc)
 	if (addspeed <= 0)
 		return;
 //	accelspeed = sv_accelerate.value * host_frametime;
-	accelspeed = sv_accelerate.value*wishspeed * host_frametime;
+	accelspeed = sv_accelerate.value*wishspeed * (float)host_frametime;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
 	
@@ -232,7 +232,7 @@ void DropPunchAngle (void)
 	
 	len = VectorNormalize (sv_player->v.punchangle);
 	
-	len -= 10*host_frametime;
+	len -= 10.0f*(float)host_frametime;
 	if (len < 0)
 		len = 0;
 	VectorScale (sv_player->v.punchangle, len, sv_player->v.punchangle);
@@ -250,6 +250,7 @@ void SV_WaterMove (void)
 	vec3_t	wishvel;
 	float	speed, newspeed, wishspeed, addspeed, accelspeed;
 
+	float _host_frametime = (float)host_frametime;
 //
 // user intentions
 //
@@ -269,7 +270,7 @@ void SV_WaterMove (void)
 		VectorScale (wishvel, sv_maxspeed.value/wishspeed, wishvel);
 		wishspeed = sv_maxspeed.value;
 	}
-	wishspeed *= 0.7;
+	wishspeed *= 0.7f;
 
 //
 // water friction
@@ -277,7 +278,7 @@ void SV_WaterMove (void)
 	speed = Length (velocity);
 	if (speed)
 	{
-		newspeed = speed - host_frametime * speed * sv_friction.value;
+		newspeed = speed - _host_frametime * speed * sv_friction.value;
 		if (newspeed < 0)
 			newspeed = 0;	
 		VectorScale (velocity, newspeed/speed, velocity);
@@ -296,7 +297,7 @@ void SV_WaterMove (void)
 		return;
 
 	VectorNormalize (wishvel);
-	accelspeed = sv_accelerate.value * wishspeed * host_frametime;
+	accelspeed = sv_accelerate.value * wishspeed * _host_frametime;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
 

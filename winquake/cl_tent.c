@@ -85,7 +85,7 @@ void CL_ParseBeam (model_t *m)
 		{
 			b->entity = ent;
 			b->model = m;
-			b->endtime = cl.time + 0.2;
+			b->endtime = cl.time + 0.2f;
 			VectorCopy (start, b->start);
 			VectorCopy (end, b->end);
 			return;
@@ -98,7 +98,7 @@ void CL_ParseBeam (model_t *m)
 		{
 			b->entity = ent;
 			b->model = m;
-			b->endtime = cl.time + 0.2;
+			b->endtime = cl.time + 0.2f;
 			VectorCopy (start, b->start);
 			VectorCopy (end, b->end);
 			return;
@@ -199,7 +199,7 @@ void CL_ParseTEnt (void)
 		dl = CL_AllocDlight (0);
 		VectorCopy (pos, dl->origin);
 		dl->radius = 350;
-		dl->die = cl.time + 0.5;
+		dl->die = cl.time + 0.5f;
 		dl->decay = 300;
 		S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
 		break;
@@ -255,7 +255,7 @@ void CL_ParseTEnt (void)
 		dl = CL_AllocDlight (0);
 		VectorCopy (pos, dl->origin);
 		dl->radius = 350;
-		dl->die = cl.time + 0.5;
+		dl->die = cl.time + 0.5f;
 		dl->decay = 300;
 		S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
 		break;
@@ -359,12 +359,12 @@ void CL_UpdateTEnts (void)
 		}
 		else
 		{
-			yaw = (int) (atan2(dist[1], dist[0]) * 180 / M_PI);
+			yaw = (int) (atan2f(dist[1], dist[0]) * (180.0f / M_PI));
 			if (yaw < 0)
 				yaw += 360;
 	
-			forward = sqrt (dist[0]*dist[0] + dist[1]*dist[1]);
-			pitch = (int) (atan2(dist[2], forward) * 180 / M_PI);
+			forward = sqrtf (dist[0]*dist[0] + dist[1]*dist[1]);
+			pitch = (int) (atan2f(dist[2], forward) * (180.0f / M_PI));
 			if (pitch < 0)
 				pitch += 360;
 		}

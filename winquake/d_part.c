@@ -60,6 +60,10 @@ void D_DrawParticle (particle_t *pparticle)
 	short	*pz;
 	int		i, izi, pix, count, u, v;
 
+	int		_screenwidth = screenwidth;
+	unsigned int	_d_zwidth = d_zwidth;
+	int		_d_y_aspect_shift = d_y_aspect_shift;
+
 // transform point
 	VectorSubtract (pparticle->org, r_origin, local);
 
@@ -72,9 +76,9 @@ void D_DrawParticle (particle_t *pparticle)
 
 // project the point
 // FIXME: preadjust xcenter and ycenter
-	zi = 1.0 / transformed[2];
-	u = (int)(xcenter + zi * transformed[0] + 0.5);
-	v = (int)(ycenter - zi * transformed[1] + 0.5);
+	zi = 1.0f / transformed[2];
+	u = (int)(xcenter + zi * transformed[0] + 0.5f);
+	v = (int)(ycenter - zi * transformed[1] + 0.5f);
 
 	if ((v > d_vrectbottom_particle) || 
 		(u > d_vrectright_particle) ||
@@ -84,7 +88,7 @@ void D_DrawParticle (particle_t *pparticle)
 		return;
 	}
 
-	pz = d_pzbuffer + (d_zwidth * v) + u;
+	pz = d_pzbuffer + (_d_zwidth * v) + u;
 	pdest = d_viewbuffer + d_scantable[v] + u;
 	izi = (int)(zi * 0x8000);
 
@@ -98,9 +102,9 @@ void D_DrawParticle (particle_t *pparticle)
 	switch (pix)
 	{
 	case 1:
-		count = 1 << d_y_aspect_shift;
+		count = 1 << _d_y_aspect_shift;
 
-		for ( ; count ; count--, pz += d_zwidth, pdest += screenwidth)
+		for ( ; count ; count--, pz += _d_zwidth, pdest += _screenwidth)
 		{
 			if (pz[0] <= izi)
 			{
@@ -111,9 +115,9 @@ void D_DrawParticle (particle_t *pparticle)
 		break;
 
 	case 2:
-		count = 2 << d_y_aspect_shift;
+		count = 2 << _d_y_aspect_shift;
 
-		for ( ; count ; count--, pz += d_zwidth, pdest += screenwidth)
+		for ( ; count ; count--, pz += _d_zwidth, pdest += _screenwidth)
 		{
 			if (pz[0] <= izi)
 			{
@@ -130,9 +134,9 @@ void D_DrawParticle (particle_t *pparticle)
 		break;
 
 	case 3:
-		count = 3 << d_y_aspect_shift;
+		count = 3 << _d_y_aspect_shift;
 
-		for ( ; count ; count--, pz += d_zwidth, pdest += screenwidth)
+		for ( ; count ; count--, pz += _d_zwidth, pdest += _screenwidth)
 		{
 			if (pz[0] <= izi)
 			{
@@ -155,9 +159,9 @@ void D_DrawParticle (particle_t *pparticle)
 		break;
 
 	case 4:
-		count = 4 << d_y_aspect_shift;
+		count = 4 << _d_y_aspect_shift;
 
-		for ( ; count ; count--, pz += d_zwidth, pdest += screenwidth)
+		for ( ; count ; count--, pz += _d_zwidth, pdest += _screenwidth)
 		{
 			if (pz[0] <= izi)
 			{
@@ -186,9 +190,9 @@ void D_DrawParticle (particle_t *pparticle)
 		break;
 
 	default:
-		count = pix << d_y_aspect_shift;
+		count = pix << _d_y_aspect_shift;
 
-		for ( ; count ; count--, pz += d_zwidth, pdest += screenwidth)
+		for ( ; count ; count--, pz += _d_zwidth, pdest += _screenwidth)
 		{
 			for (i=0 ; i<pix ; i++)
 			{

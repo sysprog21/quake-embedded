@@ -667,11 +667,11 @@ void Mod_LoadTexinfo (lump_t *l)
 		len1 = Length (out->vecs[0]);
 		len2 = Length (out->vecs[1]);
 		len1 = (len1 + len2)/2;
-		if (len1 < 0.32)
+		if (len1 < 0.32f)
 			out->mipadjust = 4;
-		else if (len1 < 0.49)
+		else if (len1 < 0.49f)
 			out->mipadjust = 3;
-		else if (len1 < 0.99)
+		else if (len1 < 0.99f)
 			out->mipadjust = 2;
 		else
 			out->mipadjust = 1;
@@ -746,9 +746,9 @@ void CalcSurfaceExtents (msurface_t *s)
 	}
 
 	for (i=0 ; i<2 ; i++)
-	{	
-		bmins[i] = floor(mins[i]/16);
-		bmaxs[i] = ceil(maxs[i]/16);
+	{
+		bmins[i] = floorf(mins[i] * (1.0f / 16.0f));
+		bmaxs[i] = ceilf(maxs[i] * (1.0f / 16.0f));
 
 		s->texturemins[i] = bmins[i] * 16;
 		s->extents[i] = (bmaxs[i] - bmins[i]) * 16;
@@ -1129,7 +1129,9 @@ float RadiusFromBounds (vec3_t mins, vec3_t maxs)
 
 	for (i=0 ; i<3 ; i++)
 	{
-		corner[i] = fabs(mins[i]) > fabs(maxs[i]) ? fabs(mins[i]) : fabs(maxs[i]);
+		float mi = fabsf(mins[i]);
+		float ma = fabsf(maxs[i]);
+		corner[i] = mi > ma ? mi : ma;
 	}
 
 	return Length (corner);
@@ -1317,7 +1319,7 @@ void * Mod_LoadAliasGroup (void * pin, int *pframeindex, int numv,
 	for (i=0 ; i<numframes ; i++)
 	{
 		*poutintervals = LittleFloat (pin_intervals->interval);
-		if (*poutintervals <= 0.0)
+		if (*poutintervals <= 0.0f)
 			Sys_Error ("Mod_LoadAliasGroup: interval<=0");
 
 		poutintervals++;
@@ -1752,7 +1754,7 @@ void * Mod_LoadSpriteGroup (void * pin, mspriteframe_t **ppframe)
 	for (i=0 ; i<numframes ; i++)
 	{
 		*poutintervals = LittleFloat (pin_intervals->interval);
-		if (*poutintervals <= 0.0)
+		if (*poutintervals <= 0.0f)
 			Sys_Error ("Mod_LoadSpriteGroup: interval<=0");
 
 		poutintervals++;
