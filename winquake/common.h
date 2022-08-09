@@ -117,16 +117,18 @@ float MSG_ReadAngle (void);
 #if defined(__riscv) || defined(__riscv__) /* older GCC toolchain */
 static inline void Q_memset(void *dest, int fill, int count) { memset(dest, fill, count); }
 static inline void Q_memcpy(void *dest, void *src, int count) { memcpy(dest, src, count); }
-static inline int Q_memcmp (void *m1, void *m2, int count) { return memcmp(m1, m2, count); }
-static inline void Q_strcpy (char *dest, char *src) { strcpy(dest, src); }
-static inline void Q_strncpy (char *dest, char *src, int count) { strncpy(dest, src, count); }
-static inline int Q_strlen (char *str) { return strlen(str); }
-static inline char *Q_strrchr (char *s, char c) { return strrchr(s, c); }
-static inline void Q_strcat (char *dest, char *src) { strcat(dest, src); }
-static inline int Q_strcmp (char *s1, char *s2) { return strcmp(s1, s2); }
-static inline int Q_strncmp (char *s1, char *s2, int count) { return strncmp(s1, s2, count); }
-static inline int Q_strcasecmp (char *s1, char *s2) { return strcasecmp(s1, s2); }
-static inline int Q_strncasecmp (char *s1, char *s2, int n) { return strncasecmp(s1, s2, n); }
+static inline int Q_memcmp(void *m1, void *m2, int count) { return memcmp(m1, m2, count); }
+static inline void Q_strcpy(char *dest, char *src) { strcpy(dest, src); }
+static inline void Q_strncpy(char *dest, char *src, int count) { strncpy(dest, src, count); }
+static inline int Q_strlen(char *str) { return strlen(str); }
+static inline char *Q_strrchr(char *s, char c) { return strrchr(s, c); }
+static inline void Q_strcat(char *dest, char *src) { strcat(dest, src); }
+static inline int Q_strcmp(char *s1, char *s2) { return strcmp(s1, s2); }
+static inline int Q_strncmp(char *s1, char *s2, int count) { return strncmp(s1, s2, count); }
+static inline int Q_strcasecmp(char *s1, char *s2) { return strcasecmp(s1, s2); }
+static inline int Q_strncasecmp(char *s1, char *s2, int n) { return strncasecmp(s1, s2, n); }
+static inline int Q_atoi(char *str) { return atoi(str); }
+static inline float Q_atof(char *str) { return atof(str); }
 #else
 void Q_memset (void *dest, int fill, int count);
 void Q_memcpy (void *dest, void *src, int count);
@@ -140,9 +142,9 @@ int Q_strcmp (char *s1, char *s2);
 int Q_strncmp (char *s1, char *s2, int count);
 int Q_strcasecmp (char *s1, char *s2);
 int Q_strncasecmp (char *s1, char *s2, int n);
-#endif
 int	Q_atoi (char *str);
 float Q_atof (char *str);
+#endif
 
 //============================================================================
 

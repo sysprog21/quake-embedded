@@ -274,7 +274,6 @@ int Q_strcasecmp (char *s1, char *s2)
 {
 	return Q_strncasecmp (s1, s2, 99999);
 }
-#endif /* !defined(__riscv) */
 
 int Q_atoi (char *str)
 {
@@ -409,6 +408,7 @@ float Q_atof (char *str)
 	
 	return val*sign;
 }
+#endif /* !defined(__riscv) */
 
 /*
 ============================================================================
