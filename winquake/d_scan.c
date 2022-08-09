@@ -43,7 +43,7 @@ D_WarpScreen
 */
 void D_WarpScreen (void)
 {
-	int		w, h;
+	int		w, h, src_w, src_h;
 	int		u,v;
 	byte	*dest;
 	int		*turb;
@@ -52,34 +52,38 @@ void D_WarpScreen (void)
 	byte	*rowptr[MAXHEIGHT+(AMP2*2)];
 	int		column[MAXWIDTH+(AMP2*2)];
 	float	wratio, hratio;
+	unsigned int	_vid_rowbytes;
 
 	w = r_refdef.vrect.width;
 	h = r_refdef.vrect.height;
+	src_w = scr_vrect.width;
+	src_h = scr_vrect.height;
 
-	wratio = w / (float)scr_vrect.width;
-	hratio = h / (float)scr_vrect.height;
+	wratio = w / (float)src_w;
+	hratio = h / (float)src_h;
 
-	for (v=0 ; v<scr_vrect.height+AMP2*2 ; v++)
+	for (v=0 ; v<src_h+AMP2*2 ; v++)
 	{
 		rowptr[v] = d_viewbuffer + (r_refdef.vrect.y * screenwidth) +
 				 (screenwidth * (int)((float)v * hratio * h / (h + AMP2 * 2)));
 	}
 
-	for (u=0 ; u<scr_vrect.width+AMP2*2 ; u++)
+	for (u=0 ; u<src_w+AMP2*2 ; u++)
 	{
 		column[u] = r_refdef.vrect.x +
 				(int)((float)u * wratio * w / (w + AMP2 * 2));
 	}
 
+	_vid_rowbytes = vid.rowbytes;
 	turb = intsintable + ((int)(cl.time*SPEED)&(CYCLE-1));
-	dest = vid.buffer + scr_vrect.y * vid.rowbytes + scr_vrect.x;
+	dest = vid.buffer + scr_vrect.y * _vid_rowbytes + scr_vrect.x;
 
-	for (v=0 ; v<scr_vrect.height ; v++, dest += vid.rowbytes)
+	for (v=0 ; v<src_h ; v++, dest += _vid_rowbytes)
 	{
 		col = &column[turb[v]];
 		row = &rowptr[v];
 
-		for (u=0 ; u<scr_vrect.width ; u+=4)
+		for (u=0 ; u<src_w ; u+=4)
 		{
 			dest[u+0] = row[turb[u+0]][col[u+0]];
 			dest[u+1] = row[turb[u+1]][col[u+1]];
@@ -101,14 +105,31 @@ void D_DrawTurbulent8Span (void)
 {
 	int		sturb, tturb;
 
+	// Preload global variables.
+	fixed16_t _r_turb_s = r_turb_s;
+	fixed16_t _r_turb_t = r_turb_t;
+	const fixed16_t _r_turb_sstep = r_turb_sstep;
+	fixed16_t _r_turb_tstep = r_turb_tstep;
+	int _r_turb_spancount = r_turb_spancount;
+	int* _r_turb_turb = r_turb_turb;
+	unsigned char* _r_turb_pbase = r_turb_pbase;
+	unsigned char* _r_turb_pdest = r_turb_pdest;
+
 	do
 	{
-		sturb = ((r_turb_s + r_turb_turb[(r_turb_t>>16)&(CYCLE-1)])>>16)&63;
-		tturb = ((r_turb_t + r_turb_turb[(r_turb_s>>16)&(CYCLE-1)])>>16)&63;
-		*r_turb_pdest++ = *(r_turb_pbase + (tturb<<6) + sturb);
-		r_turb_s += r_turb_sstep;
-		r_turb_t += r_turb_tstep;
-	} while (--r_turb_spancount > 0);
+		sturb = ((_r_turb_s + _r_turb_turb[(_r_turb_t>>16)&(CYCLE-1)])>>16)&63;
+		tturb = ((_r_turb_t + _r_turb_turb[(_r_turb_s>>16)&(CYCLE-1)])>>16)&63;
+		*_r_turb_pdest++ = *(_r_turb_pbase + (tturb<<6) + sturb);
+		_r_turb_s += _r_turb_sstep;
+		_r_turb_t += _r_turb_tstep;
+	} while (--_r_turb_spancount > 0);
+
+	// Update global variables.
+	r_turb_pbase = _r_turb_pbase;
+	r_turb_pdest = _r_turb_pdest;
+	r_turb_s = _r_turb_s;
+	r_turb_t = _r_turb_t;
+	r_turb_spancount = _r_turb_spancount;
 }
 
 #endif	// !id386
