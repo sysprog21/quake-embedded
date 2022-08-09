@@ -290,27 +290,71 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 {
 	byte			*dest, *source;
 	unsigned short	*pusdest;
-	int				v, u;
+	int				w, h, i, j;
+	fixed16_t		du, dv, u, v;
 
-	if ((x < 0) ||
-		(x + pic->width > vid.width) ||
-		(y < 0) ||
-		(y + pic->height > vid.height))
+	if (x < 0 || y < 0)
 	{
 		Sys_Error ("Draw_Pic: bad coordinates");
 	}
 
-	source = pic->data;
+	// Scale image to fit the screen width and height.
+	// This is a hack to make things (esp. the help pics) fit on screens with
+	// a resolution lower than 320x200.
+	w = pic->width;
+	h = pic->height;
+	if (x + w > vid.width)
+	{
+		w = vid.width - x;
+		if (w < 1)
+			return;
+		du = (pic->width << 16) / w;
+	}
+	else
+	{
+		du = 0x10000;
+	}
+	if (y + h > vid.height)
+	{
+		h = vid.height - y;
+		if (h < 1)
+			return;
+		dv = (pic->height << 16) / h;
+	}
+	else
+	{
+		dv = 0x10000;
+	}
 
 	if (r_pixbytes == 1)
 	{
 		dest = vid.buffer + y * vid.rowbytes + x;
 
-		for (v=0 ; v<pic->height ; v++)
+		v = 0;
+		if (du == 0x10000)
 		{
-			Q_memcpy (dest, source, pic->width);
-			dest += vid.rowbytes;
-			source += pic->width;
+			for (i=0 ; i<h ; i++)
+			{
+				source = pic->data + (v >> 16) * pic->width;
+				memcpy (dest, source, w);
+				dest += vid.rowbytes;
+				v += dv;
+			}
+		}
+		else
+		{
+			for (i=0 ; i<h ; i++)
+			{
+				source = pic->data + (v >> 16) * pic->width;
+				u = 0;
+				for (j=0 ; j<w ; j++)
+				{
+					dest[j] = source[u >> 16];
+					u += du;
+				}
+				dest += vid.rowbytes;
+				v += dv;
+			}
 		}
 	}
 	else
@@ -318,15 +362,18 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 	// FIXME: pretranslate at load time?
 		pusdest = (unsigned short *)vid.buffer + y * (vid.rowbytes >> 1) + x;
 
-		for (v=0 ; v<pic->height ; v++)
+		v = 0;
+		for (i=0 ; i<h ; i++)
 		{
-			for (u=0 ; u<pic->width ; u++)
+			source = pic->data + (v >> 16) * pic->width;
+			u = 0;
+			for (j=0 ; j<w ; j++)
 			{
-				pusdest[u] = d_8to16table[source[u]];
+				pusdest[j] = d_8to16table[source[u >> 16]];
+				u += du;
 			}
-
 			pusdest += vid.rowbytes >> 1;
-			source += pic->width;
+			v += dv;
 		}
 	}
 }
