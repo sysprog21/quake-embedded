@@ -610,7 +610,7 @@ void V_UpdatePalette (void)
 		newpal += 3;
 	}
 
-	VID_ShiftPalette (pal);	
+	VID_SetPalette (pal);	
 }
 #else	// !GLQUAKE
 void V_UpdatePalette (void)
@@ -678,7 +678,7 @@ void V_UpdatePalette (void)
 		newpal += 3;
 	}
 
-	VID_ShiftPalette (pal);	
+	VID_SetPalette (pal);	
 }
 #endif	// !GLQUAKE
 
