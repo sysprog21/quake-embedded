@@ -62,7 +62,9 @@ cvar_t	crosshair = {"crosshair", "0", true};
 cvar_t	cl_crossx = {"cl_crossx", "0", false};
 cvar_t	cl_crossy = {"cl_crossy", "0", false};
 
+#ifdef GLQUAKE
 cvar_t	gl_cshiftpercent = {"gl_cshiftpercent", "100", false};
+#endif
 
 float	v_dmg_time, v_dmg_roll, v_dmg_pitch;
 
@@ -1091,7 +1093,9 @@ void V_Init (void)
 	Cvar_RegisterVariable (&crosshair);
 	Cvar_RegisterVariable (&cl_crossx);
 	Cvar_RegisterVariable (&cl_crossy);
+#ifdef GLQUAKE
 	Cvar_RegisterVariable (&gl_cshiftpercent);
+#endif
 
 	Cvar_RegisterVariable (&scr_ofsx);
 	Cvar_RegisterVariable (&scr_ofsy);
