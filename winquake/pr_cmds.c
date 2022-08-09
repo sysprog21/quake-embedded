@@ -38,7 +38,7 @@ char *PF_VarString (int	first)
 	out[0] = 0;
 	for (i=first ; i<pr_argc ; i++)
 	{
-		strcat (out, G_STRING((OFS_PARM0+i*3)));
+		strcat (out, G_STRING_SAFE ((OFS_PARM0+i*3)));
 	}
 	return out;
 }

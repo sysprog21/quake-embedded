@@ -740,7 +740,7 @@ void Sbar_DrawInventory (void)
 	// sigils
 		for (i=0 ; i<4 ; i++)
 		{
-			if (cl.items & (1<<(28+i)))
+			if (cl.items & (1U<<(28+i)))
 			{
 				time = cl.item_gettime[28+i];
 				if (time &&	time > cl.time - 2 && flashon )

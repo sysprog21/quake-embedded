@@ -952,8 +952,15 @@ void SV_CreateBaseline (void)
 		else
 		{
 			svent->baseline.colormap = 0;
-			svent->baseline.modelindex =
-				SV_ModelIndex(pr_strings + svent->v.model);
+			if (G_VALID_STRING (svent->v.model))
+			{
+				svent->baseline.modelindex =
+					SV_ModelIndex(pr_strings + svent->v.model);
+			}
+			else
+			{
+				svent->baseline.modelindex = 0;
+			}
 		}
 		
 	//

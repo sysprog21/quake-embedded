@@ -545,7 +545,7 @@ void CL_ParseClientdata (int bits)
 	{	// set flash times
 		Sbar_Changed ();
 		for (j=0 ; j<32 ; j++)
-			if ( (i & (1<<j)) && !(cl.items & (1<<j)))
+			if ( (i & (1U<<j)) && !(cl.items & (1U<<j)))
 				cl.item_gettime[j] = cl.time;
 		cl.items = i;
 	}

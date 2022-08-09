@@ -77,7 +77,7 @@ void R_AddDynamicLights (void)
 
 	for (lnum=0 ; lnum<MAX_DLIGHTS ; lnum++)
 	{
-		if ( !(surf->dlightbits & (1<<lnum) ) )
+		if ( !(surf->dlightbits & (1U<<lnum) ) )
 			continue;		// not lit by this light
 
 		rad = cl_dlights[lnum].radius;
@@ -342,7 +342,8 @@ R_DrawSurfaceBlock8_mip0
 */
 void R_DrawSurfaceBlock8_mip0 (void)
 {
-	int				v, i, b, lightstep, lighttemp, light;
+	int				v, i, b, lighttemp;
+	unsigned light, lightstep;
 	unsigned char	pix, *psource, *prowdest;
 
 	unsigned _lightleft, _lightright, _lightleftstep, _lightrightstep;
@@ -401,7 +402,8 @@ R_DrawSurfaceBlock8_mip1
 */
 void R_DrawSurfaceBlock8_mip1 (void)
 {
-	int				v, i, b, lightstep, lighttemp, light;
+	int				v, i, b, lighttemp;
+	unsigned light, lightstep;
 	unsigned char	pix, *psource, *prowdest;
 
 	unsigned _lightleft, _lightright, _lightleftstep, _lightrightstep;
@@ -460,7 +462,8 @@ R_DrawSurfaceBlock8_mip2
 */
 void R_DrawSurfaceBlock8_mip2 (void)
 {
-	int				v, i, b, lightstep, lighttemp, light;
+	int				v, i, b, lighttemp;
+	unsigned light, lightstep;
 	unsigned char	pix, *psource, *prowdest;
 
 	unsigned _lightleft, _lightright, _lightleftstep, _lightrightstep;
@@ -519,7 +522,8 @@ R_DrawSurfaceBlock8_mip3
 */
 void R_DrawSurfaceBlock8_mip3 (void)
 {
-	int				v, i, b, lightstep, lighttemp, light;
+	int				v, i, b, lighttemp;
+	unsigned light, lightstep;
 	unsigned char	pix, *psource, *prowdest;
 
 	unsigned _lightleft, _lightright, _lightleftstep, _lightrightstep;

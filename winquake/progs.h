@@ -53,6 +53,7 @@ typedef struct edict_s
 extern	dprograms_t		*progs;
 extern	dfunction_t		*pr_functions;
 extern	char			*pr_strings;
+extern	int				pr_numstrings;
 extern	ddef_t			*pr_globaldefs;
 extern	ddef_t			*pr_fielddefs;
 extern	dstatement_t	*pr_statements;
@@ -104,6 +105,10 @@ int NUM_FOR_EDICT(edict_t *e);
 #define G_EDICTNUM(o) NUM_FOR_EDICT(G_EDICT(o))
 #define	G_VECTOR(o) (&pr_globals[o])
 #define	G_STRING(o) (pr_strings + *(string_t *)&pr_globals[o])
+#define	G_VALID_STRING(s) (s >= 0 && s < pr_numstrings)
+#define	G_STRING_SAFE(o) (G_VALID_STRING(*(string_t *)&pr_globals[o]) ?	\
+                          pr_strings + *(string_t *)&pr_globals[o] :		\
+                          pr_strings + 0)
 #define	G_FUNCTION(o) (*(func_t *)&pr_globals[o])
 
 #define	E_FLOAT(e,o) (((float*)&e->v)[o])

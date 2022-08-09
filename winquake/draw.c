@@ -928,8 +928,8 @@ Call before beginning any disc IO.
 */
 void Draw_BeginDisc (void)
 {
-
-	D_BeginDirectRect (vid.width - 24, 0, draw_disc->data, 24, 24);
+	if (draw_disc != NULL)
+		D_BeginDirectRect (vid.width - 24, 0, draw_disc->data, 24, 24);
 }
 
 
