@@ -117,7 +117,7 @@ float MSG_ReadAngle (void);
 #if defined(__riscv) || defined(__riscv__) /* older GCC toolchain */
 static inline void Q_memset(void *dest, int fill, int count) { memset(dest, fill, count); }
 static inline void Q_memcpy(void *dest, void *src, int count) { memcpy(dest, src, count); }
-static inline int Q_memcmp (void *m1, void *m2, int count) { return memcpy(m1, m2, count); }
+static inline int Q_memcmp (void *m1, void *m2, int count) { return memcmp(m1, m2, count); }
 static inline void Q_strcpy (char *dest, char *src) { strcpy(dest, src); }
 static inline void Q_strncpy (char *dest, char *src, int count) { strncpy(dest, src, count); }
 static inline int Q_strlen (char *str) { return strlen(str); }
