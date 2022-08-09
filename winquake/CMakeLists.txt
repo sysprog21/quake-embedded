@@ -62,6 +62,13 @@ set(WQ_SRCS
 	sv_user.c
 )
 
+# Always warn for unnecessary use of double-precision.
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+	list(APPEND OPTS
+		-Wdouble-promotion
+	)
+endif()
+
 if(CMAKE_SYSTEM_NAME MATCHES "(Darwin|Linux)")
 	list(APPEND WQ_SRCS
 		net_dgrm.c
@@ -76,6 +83,7 @@ endif()
 
 add_library(winquake OBJECT ${WQ_SRCS} ${WQ_ASM_SRCS})
 
+target_compile_options(winquake PRIVATE ${OPTS})
 target_include_directories(winquake PUBLIC
 	${PROJECT_SOURCE_DIR}/winquake
 )
