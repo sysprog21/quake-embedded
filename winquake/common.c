@@ -120,6 +120,7 @@ void InsertLinkAfter (link_t *l, link_t *after)
 ============================================================================
 */
 
+#if !defined(__riscv) && !defined(__riscv__) /* older GCC toolchain */
 void Q_memset (void *dest, int fill, int count)
 {
 	int             i;
@@ -273,6 +274,7 @@ int Q_strcasecmp (char *s1, char *s2)
 {
 	return Q_strncasecmp (s1, s2, 99999);
 }
+#endif /* !defined(__riscv) */
 
 int Q_atoi (char *str)
 {
