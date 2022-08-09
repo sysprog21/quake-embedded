@@ -102,6 +102,16 @@ char		m_return_reason [32];
 
 void M_ConfigureNetSubsystem(void);
 
+static inline int _M_RealTime4Mod1(void)
+{
+	return (int)(4.0F * (float)realtime) & 1;
+}
+
+static inline int _M_HostTime10Mod6(void)
+{
+	return (int)(10.0F * (float)host_time) % 6;
+}
+
 /*
 ================
 M_DrawCharacter
@@ -290,7 +300,6 @@ void M_Menu_Main_f (void)
 
 void M_Main_Draw (void)
 {
-	int		f;
 	qpic_t	*p;
 
 	M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
@@ -298,9 +307,7 @@ void M_Main_Draw (void)
 	M_DrawPic ( (320-p->width)/2, 4, p);
 	M_DrawTransPic (72, 32, Draw_CachePic ("gfx/mainmenu.lmp") );
 
-	f = (int)(host_time * 10)%6;
-
-	M_DrawTransPic (54, 32 + m_main_cursor * 20,Draw_CachePic( va("gfx/menudot%i.lmp", f+1 ) ) );
+	M_DrawTransPic (54, 32 + m_main_cursor * 20,Draw_CachePic( va("gfx/menudot%i.lmp", _M_HostTime10Mod6()+1 ) ) );
 }
 
 
@@ -373,7 +380,6 @@ void M_Menu_SinglePlayer_f (void)
 
 void M_SinglePlayer_Draw (void)
 {
-	int		f;
 	qpic_t	*p;
 
 	M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
@@ -381,9 +387,7 @@ void M_SinglePlayer_Draw (void)
 	M_DrawPic ( (320-p->width)/2, 4, p);
 	M_DrawTransPic (72, 32, Draw_CachePic ("gfx/sp_menu.lmp") );
 
-	f = (int)(host_time * 10)%6;
-
-	M_DrawTransPic (54, 32 + m_singleplayer_cursor * 20,Draw_CachePic( va("gfx/menudot%i.lmp", f+1 ) ) );
+	M_DrawTransPic (54, 32 + m_singleplayer_cursor * 20,Draw_CachePic( va("gfx/menudot%i.lmp", _M_HostTime10Mod6()+1 ) ) );
 }
 
 
@@ -507,7 +511,7 @@ void M_Load_Draw (void)
 		M_Print (16, 32 + 8*i, m_filenames[i]);
 
 // line cursor
-	M_DrawCharacter (8, 32 + load_cursor*8, 12+((int)(realtime*4)&1));
+	M_DrawCharacter (8, 32 + load_cursor*8, 12 + _M_RealTime4Mod1());
 }
 
 
@@ -523,7 +527,7 @@ void M_Save_Draw (void)
 		M_Print (16, 32 + 8*i, m_filenames[i]);
 
 // line cursor
-	M_DrawCharacter (8, 32 + load_cursor*8, 12+((int)(realtime*4)&1));
+	M_DrawCharacter (8, 32 + load_cursor*8, 12 + _M_RealTime4Mod1());
 }
 
 
@@ -618,7 +622,6 @@ void M_Menu_MultiPlayer_f (void)
 
 void M_MultiPlayer_Draw (void)
 {
-	int		f;
 	qpic_t	*p;
 
 	M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
@@ -626,9 +629,7 @@ void M_MultiPlayer_Draw (void)
 	M_DrawPic ( (320-p->width)/2, 4, p);
 	M_DrawTransPic (72, 32, Draw_CachePic ("gfx/mp_menu.lmp") );
 
-	f = (int)(host_time * 10)%6;
-
-	M_DrawTransPic (54, 32 + m_multiplayer_cursor * 20,Draw_CachePic( va("gfx/menudot%i.lmp", f+1 ) ) );
+	M_DrawTransPic (54, 32 + m_multiplayer_cursor * 20,Draw_CachePic( va("gfx/menudot%i.lmp", _M_HostTime10Mod6()+1 ) ) );
 
 	if (serialAvailable || ipxAvailable || tcpipAvailable)
 		return;
@@ -707,6 +708,7 @@ void M_Menu_Setup_f (void)
 void M_Setup_Draw (void)
 {
 	qpic_t	*p;
+	int		f;
 
 	M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
 	p = Draw_CachePic ("gfx/p_multi.lmp");
@@ -732,13 +734,14 @@ void M_Setup_Draw (void)
 	M_BuildTranslationTable(setup_top*16, setup_bottom*16);
 	M_DrawTransPicTranslate (172, 72, p);
 
-	M_DrawCharacter (56, setup_cursor_table [setup_cursor], 12+((int)(realtime*4)&1));
+	f = _M_RealTime4Mod1();
+	M_DrawCharacter (56, setup_cursor_table [setup_cursor], 12 + f);
 
 	if (setup_cursor == 0)
-		M_DrawCharacter (168 + 8*strlen(setup_hostname), setup_cursor_table [setup_cursor], 10+((int)(realtime*4)&1));
+		M_DrawCharacter (168 + 8*strlen(setup_hostname), setup_cursor_table [setup_cursor], 10+f);
 
 	if (setup_cursor == 1)
-		M_DrawCharacter (168 + 8*strlen(setup_myname), setup_cursor_table [setup_cursor], 10+((int)(realtime*4)&1));
+		M_DrawCharacter (168 + 8*strlen(setup_myname), setup_cursor_table [setup_cursor], 10+f);
 }
 
 
@@ -898,7 +901,7 @@ void M_Menu_Net_f (void)
 
 void M_Net_Draw (void)
 {
-	int		f;
+	int f;
 	qpic_t	*p;
 
 	M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
@@ -970,8 +973,7 @@ void M_Net_Draw (void)
 	M_Print (f, 158, net_helpMessage[m_net_cursor*4+2]);
 	M_Print (f, 166, net_helpMessage[m_net_cursor*4+3]);
 
-	f = (int)(host_time * 10)%6;
-	M_DrawTransPic (54, 32 + m_net_cursor * 20,Draw_CachePic( va("gfx/menudot%i.lmp", f+1 ) ) );
+	M_DrawTransPic (54, 32 + m_net_cursor * 20,Draw_CachePic( va("gfx/menudot%i.lmp", _M_HostTime10Mod6()+1 ) ) );
 }
 
 
@@ -1232,7 +1234,7 @@ void M_Options_Draw (void)
 #endif
 
 // cursor
-	M_DrawCharacter (200, 32 + options_cursor*8, 12+((int)(realtime*4)&1));
+	M_DrawCharacter (200, 32 + options_cursor*8, 12 + _M_RealTime4Mod1());
 }
 
 
@@ -1391,7 +1393,6 @@ void M_UnbindCommand (char *command)
 	}
 }
 
-
 void M_Keys_Draw (void)
 {
 	int		i, l;
@@ -1439,7 +1440,7 @@ void M_Keys_Draw (void)
 	if (bind_grab)
 		M_DrawCharacter (130, 48 + keys_cursor*8, '=');
 	else
-		M_DrawCharacter (130, 48 + keys_cursor*8, 12+((int)(realtime*4)&1));
+		M_DrawCharacter (130, 48 + keys_cursor*8, 12 + _M_RealTime4Mod1());
 }
 
 
@@ -1774,7 +1775,7 @@ void M_Menu_SerialConfig_f (void)
 void M_SerialConfig_Draw (void)
 {
 	qpic_t	*p;
-	int		basex;
+	int		basex, f;
 	char	*startJoin;
 	char	*directModem;
 
@@ -1828,10 +1829,11 @@ void M_SerialConfig_Draw (void)
 		M_Print (basex+8, serialConfig_cursor_table[5], "OK");
 	}
 
-	M_DrawCharacter (basex-8, serialConfig_cursor_table [serialConfig_cursor], 12+((int)(realtime*4)&1));
+	f = _M_RealTime4Mod1();
+	M_DrawCharacter (basex-8, serialConfig_cursor_table [serialConfig_cursor], 12 + f);
 
 	if (serialConfig_cursor == 4)
-		M_DrawCharacter (168 + 8*strlen(serialConfig_phone), serialConfig_cursor_table [serialConfig_cursor], 10+((int)(realtime*4)&1));
+		M_DrawCharacter (168 + 8*strlen(serialConfig_phone), serialConfig_cursor_table [serialConfig_cursor], 10 + f);
 
 	if (*m_return_reason)
 		M_PrintWhite (basex, 148, m_return_reason);
@@ -2026,13 +2028,15 @@ void M_Menu_ModemConfig_f (void)
 void M_ModemConfig_Draw (void)
 {
 	qpic_t	*p;
-	int		basex;
+	int		basex, f;
 
 	M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
 	p = Draw_CachePic ("gfx/p_multi.lmp");
 	basex = (320-p->width)/2;
 	M_DrawPic (basex, 4, p);
 	basex += 8;
+
+	f = _M_RealTime4Mod1();
 
 	if (modemConfig_dialing == 'P')
 		M_Print (basex, modemConfig_cursor_table[0], "Pulse Dialing");
@@ -2043,24 +2047,24 @@ void M_ModemConfig_Draw (void)
 	M_DrawTextBox (basex, modemConfig_cursor_table[1]+4, 16, 1);
 	M_Print (basex+8, modemConfig_cursor_table[1]+12, modemConfig_clear);
 	if (modemConfig_cursor == 1)
-		M_DrawCharacter (basex+8 + 8*strlen(modemConfig_clear), modemConfig_cursor_table[1]+12, 10+((int)(realtime*4)&1));
+		M_DrawCharacter (basex+8 + 8*strlen(modemConfig_clear), modemConfig_cursor_table[1]+12, 10+f);
 
 	M_Print (basex, modemConfig_cursor_table[2], "Init");
 	M_DrawTextBox (basex, modemConfig_cursor_table[2]+4, 30, 1);
 	M_Print (basex+8, modemConfig_cursor_table[2]+12, modemConfig_init);
 	if (modemConfig_cursor == 2)
-		M_DrawCharacter (basex+8 + 8*strlen(modemConfig_init), modemConfig_cursor_table[2]+12, 10+((int)(realtime*4)&1));
+		M_DrawCharacter (basex+8 + 8*strlen(modemConfig_init), modemConfig_cursor_table[2]+12, 10+f);
 
 	M_Print (basex, modemConfig_cursor_table[3], "Hangup");
 	M_DrawTextBox (basex, modemConfig_cursor_table[3]+4, 16, 1);
 	M_Print (basex+8, modemConfig_cursor_table[3]+12, modemConfig_hangup);
 	if (modemConfig_cursor == 3)
-		M_DrawCharacter (basex+8 + 8*strlen(modemConfig_hangup), modemConfig_cursor_table[3]+12, 10+((int)(realtime*4)&1));
+		M_DrawCharacter (basex+8 + 8*strlen(modemConfig_hangup), modemConfig_cursor_table[3]+12, 10+f);
 
 	M_DrawTextBox (basex, modemConfig_cursor_table[4]-8, 2, 1);
 	M_Print (basex+8, modemConfig_cursor_table[4], "OK");
 
-	M_DrawCharacter (basex-8, modemConfig_cursor_table [modemConfig_cursor], 12+((int)(realtime*4)&1));
+	M_DrawCharacter (basex-8, modemConfig_cursor_table [modemConfig_cursor], 12+f);
 }
 
 
@@ -2210,7 +2214,7 @@ void M_Menu_LanConfig_f (void)
 void M_LanConfig_Draw (void)
 {
 	qpic_t	*p;
-	int		basex;
+	int		basex, f;
 	char	*startJoin;
 	char	*protocol;
 
@@ -2253,13 +2257,14 @@ void M_LanConfig_Draw (void)
 		M_Print (basex+8, lanConfig_cursor_table[1], "OK");
 	}
 
-	M_DrawCharacter (basex-8, lanConfig_cursor_table [lanConfig_cursor], 12+((int)(realtime*4)&1));
+	f = _M_RealTime4Mod1();
+	M_DrawCharacter (basex-8, lanConfig_cursor_table [lanConfig_cursor], 12+f);
 
 	if (lanConfig_cursor == 0)
-		M_DrawCharacter (basex+9*8 + 8*strlen(lanConfig_portname), lanConfig_cursor_table [0], 10+((int)(realtime*4)&1));
+		M_DrawCharacter (basex+9*8 + 8*strlen(lanConfig_portname), lanConfig_cursor_table [0], 10+f);
 
 	if (lanConfig_cursor == 2)
-		M_DrawCharacter (basex+16 + 8*strlen(lanConfig_joinname), lanConfig_cursor_table [2], 10+((int)(realtime*4)&1));
+		M_DrawCharacter (basex+16 + 8*strlen(lanConfig_joinname), lanConfig_cursor_table [2], 10+f);
 
 	if (*m_return_reason)
 		M_PrintWhite (basex, 148, m_return_reason);
@@ -2648,7 +2653,7 @@ void M_GameOptions_Draw (void)
    }
 
 // line cursor
-	M_DrawCharacter (144, gameoptions_cursor_table[gameoptions_cursor], 12+((int)(realtime*4)&1));
+	M_DrawCharacter (144, gameoptions_cursor_table[gameoptions_cursor], 12+_M_RealTime4Mod1());
 
 	if (m_serverInfoMessage)
 	{
@@ -2945,7 +2950,7 @@ void M_ServerList_Draw (void)
 			sprintf(string, "%-15.15s %-15.15s\n", hostcache[n].name, hostcache[n].map);
 		M_Print (16, 32 + 8*n, string);
 	}
-	M_DrawCharacter (0, 32 + slist_cursor*8, 12+((int)(realtime*4)&1));
+	M_DrawCharacter (0, 32 + slist_cursor*8, 12 + _M_RealTime4Mod1());
 
 	if (*m_return_reason)
 		M_PrintWhite (16, 148, m_return_reason);

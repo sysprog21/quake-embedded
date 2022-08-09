@@ -557,7 +557,8 @@ int	NET_GetMessage (qsocket_t *sock)
 	// see if this connection has timed out
 	if (ret == 0 && sock->driver)
 	{
-		if (net_time - sock->lastMessageTime > net_messagetimeout.value)
+		float dt = (float)(net_time - sock->lastMessageTime);
+		if (dt > net_messagetimeout.value)
 		{
 			NET_Close(sock);
 			return -1;
@@ -933,7 +934,7 @@ void NET_Poll(void)
 	{
 		if (serialAvailable)
 		{
-			if (config_com_modem.value == 1.0)
+			if (config_com_modem.value == 1.0F)
 				useModem = true;
 			else
 				useModem = false;

@@ -39,7 +39,7 @@ typedef struct
 	qboolean	paused;
 	qboolean	loadgame;			// handle connections specially
 
-	double		time;
+	double		time;				// TODO(m): Convert to float?
 	
 	int			lastcheck;			// used by PF_checkclient
 	double		lastchecktime;

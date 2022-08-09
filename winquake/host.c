@@ -37,7 +37,7 @@ quakeparms_t host_parms;
 
 qboolean	host_initialized;		// true if into command execution
 
-double		host_frametime;
+float		host_frametime;
 double		host_time;
 double		realtime;				// without any filtering or bounding
 double		oldrealtime;			// last frame run
@@ -496,19 +496,23 @@ Returns false if the time is too short to run a frame
 */
 qboolean Host_FilterTime (float time)
 {
-	realtime += time;
+	float _new_host_frametime;
 
-	if (!cls.timedemo && realtime - oldrealtime < 1.0/72.0)
+	realtime += (double)time;
+
+	_new_host_frametime = (float)(realtime - oldrealtime);
+	if (!cls.timedemo && _new_host_frametime < (1.0F/72.0F))
 		return false;		// framerate is too high
 
-	host_frametime = realtime - oldrealtime;
 	oldrealtime = realtime;
 
 	// don't allow really long or short frame
-	if (host_frametime > 0.1)
-		host_frametime = 0.1;
-	else if (host_frametime < 0.001)
-		host_frametime = 0.001;
+	if (host_frametime > 0.1F)
+		host_frametime = 0.1F;
+	else if (host_frametime < 0.001F)
+		host_frametime = 0.001F;
+
+	host_frametime = _new_host_frametime;
 
 	return true;
 }

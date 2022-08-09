@@ -35,9 +35,9 @@ typedef	int	fixed16_t;
 struct mplane_s;
 
 extern vec3_t vec3_origin;
-extern	int nanmask;
 
-#define	IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
+#define NAN_MASK 0x7f800000
+#define	IS_NAN(x) (((*(int *)&x) & NAN_MASK) == NAN_MASK)
 
 #define DotProduct(x,y) (x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
 #define VectorSubtract(a,b,c) {c[0]=a[0]-b[0];c[1]=a[1]-b[1];c[2]=a[2]-b[2];}
@@ -62,9 +62,8 @@ int Q_log2(int val);
 void R_ConcatRotations (float in1[3][3], float in2[3][3], float out[3][3]);
 void R_ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4]);
 
-void FloorDivMod (double numer, double denom, int *quotient,
+void FloorDivMod (float numer, float denom, int *quotient,
 		int *rem);
-fixed16_t Invert24To16(fixed16_t val);
 int GreatestCommonDivisor (int i1, int i2);
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);

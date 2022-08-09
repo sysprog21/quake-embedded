@@ -194,8 +194,8 @@ float CalcFov (float fov_x, float width, float height)
         float   a;
         float   x;
 
-        if (fov_x < 1 || fov_x > 179)
-                Sys_Error ("Bad fov: %f", fov_x);
+		if (fov_x < 1.0F || fov_x > 179.0F)
+			Sys_Error ("Bad fov: %f", (double)fov_x);
 
 		x = width/tanf(fov_x*(M_PI/360.0f));
 
@@ -362,7 +362,7 @@ void SCR_DrawTurtle (void)
 	if (!scr_showturtle.value)
 		return;
 
-	if (host_frametime < 0.1)
+	if (host_frametime < 0.1F)
 	{
 		count = 0;
 		return;
@@ -446,8 +446,6 @@ void SCR_SetUpToDrawConsole (void)
 	if (scr_drawloading)
 		return;		// never a console with loading plaque
 
-	float _host_frametime = host_frametime;
-
 // decide on the height of the console
 	con_forcedup = !cl.worldmodel || cls.signon != SIGNONS;
 
@@ -463,14 +461,14 @@ void SCR_SetUpToDrawConsole (void)
 	
 	if (scr_conlines < scr_con_current)
 	{
-		scr_con_current -= scr_conspeed.value*_host_frametime;
+		scr_con_current -= scr_conspeed.value*host_frametime;
 		if (scr_conlines > scr_con_current)
 			scr_con_current = scr_conlines;
 
 	}
 	else if (scr_conlines > scr_con_current)
 	{
-		scr_con_current += scr_conspeed.value*_host_frametime;
+		scr_con_current += scr_conspeed.value*host_frametime;
 		if (scr_conlines < scr_con_current)
 			scr_con_current = scr_conlines;
 	}
@@ -679,7 +677,7 @@ void SCR_UpdateScreen (void)
 
 	if (scr_disabled_for_loading)
 	{
-		if (realtime - scr_disabled_time > 60)
+		if (((float)realtime - scr_disabled_time) > 60.0F)
 		{
 			scr_disabled_for_loading = false;
 			Con_Printf ("load failed.\n");

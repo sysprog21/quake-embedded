@@ -259,8 +259,10 @@ void CL_PrintEntities_f (void)
 			Con_Printf ("EMPTY\n");
 			continue;
 		}
-		Con_Printf ("%s:%2i  (%5.1f,%5.1f,%5.1f) [%5.1f %5.1f %5.1f]\n"
-		,ent->model->name,ent->frame, ent->origin[0], ent->origin[1], ent->origin[2], ent->angles[0], ent->angles[1], ent->angles[2]);
+		Con_Printf ("%s:%2i  (%5.1f,%5.1f,%5.1f) [%5.1f %5.1f %5.1f]\n",
+					ent->model->name, ent->frame,
+					(double)ent->origin[0], (double)ent->origin[1], (double)ent->origin[2],
+					(double)ent->angles[0], (double)ent->angles[1], (double)ent->angles[2]);
 	}
 }
 

@@ -649,9 +649,9 @@ while (1)
 	case OP_STATE:
 		ed = PROG_TO_EDICT(pr_global_struct->self);
 #ifdef FPS_20
-		ed->v.nextthink = pr_global_struct->time + 0.05;
+		ed->v.nextthink = pr_global_struct->time + 0.05F;
 #else
-		ed->v.nextthink = pr_global_struct->time + 0.1;
+		ed->v.nextthink = pr_global_struct->time + 0.1F;
 #endif
 		if (a->_float != ed->v.frame)
 		{

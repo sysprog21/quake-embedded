@@ -127,7 +127,7 @@ void SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
 		Sys_Error ("SV_StartSound: volume = %i", volume);
 
 	if (attenuation < 0 || attenuation > 4)
-		Sys_Error ("SV_StartSound: attenuation = %f", attenuation);
+		Sys_Error ("SV_StartSound: attenuation = %f", (double)attenuation);
 
 	if (channel < 0 || channel > 7)
 		Sys_Error ("SV_StartSound: channel = %i", channel);
@@ -1078,7 +1078,7 @@ void SV_SpawnServer (char *server)
 //
 	if (coop.value)
 		Cvar_SetValue ("deathmatch", 0);
-	current_skill = (int)(skill.value + 0.5);
+	current_skill = (int)(skill.value + 0.5F);
 	if (current_skill < 0)
 		current_skill = 0;
 	if (current_skill > 3)
@@ -1190,7 +1190,7 @@ void SV_SpawnServer (char *server)
 	sv.state = ss_active;
 	
 // run two frames to allow everything to settle
-	host_frametime = 0.1;
+	host_frametime = 0.1F;
 	SV_Physics ();
 	SV_Physics ();
 

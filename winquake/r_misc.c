@@ -95,7 +95,7 @@ void R_TimeRefresh_f (void)
 	}
 	stop = Sys_FloatTime ();
 	time = stop-start;
-	Con_Printf ("%f seconds (%f fps)\n", time, 128/time);
+	Con_Printf ("%f seconds (%f fps)\n", (double)time, (double)(128.0F/time));
 	
 	r_refdef.viewangles[1] = startangle;
 }
@@ -198,10 +198,10 @@ void R_PrintTimes (void)
 
 	r_time2 = Sys_FloatTime ();
 
-	ms = 1000* (r_time2 - r_time1);
+	ms = 1000.0F * (r_time2 - r_time1);
 	
 	Con_Printf ("%5.1f ms %3i/%3i/%3i poly %3i surf\n",
-				ms, c_faceclip, r_polycount, r_drawnpolycount, c_surf);
+				(double)ms, c_faceclip, r_polycount, r_drawnpolycount, c_surf);
 	c_surf = 0;
 }
 
@@ -215,19 +215,19 @@ void R_PrintDSpeeds (void)
 {
 	float	ms, dp_time, r_time2, rw_time, db_time, se_time, de_time, dv_time;
 
-	r_time2 = Sys_FloatTime ();
+	r_time2 = (float)Sys_FloatTime ();
 
-	dp_time = (dp_time2 - dp_time1) * 1000;
-	rw_time = (rw_time2 - rw_time1) * 1000;
-	db_time = (db_time2 - db_time1) * 1000;
-	se_time = (se_time2 - se_time1) * 1000;
-	de_time = (de_time2 - de_time1) * 1000;
-	dv_time = (dv_time2 - dv_time1) * 1000;
-	ms = (r_time2 - r_time1) * 1000;
+	dp_time = (dp_time2 - dp_time1) * 1000.0F;
+	rw_time = (rw_time2 - rw_time1) * 1000.0F;
+	db_time = (db_time2 - db_time1) * 1000.0F;
+	se_time = (se_time2 - se_time1) * 1000.0F;
+	de_time = (de_time2 - de_time1) * 1000.0F;
+	dv_time = (dv_time2 - dv_time1) * 1000.0F;
+	ms = (r_time2 - r_time1) * 1000.0F;
 
 	Con_Printf ("%3i %4.1fp %3iw %4.1fb %3is %4.1fe %4.1fv\n",
-				(int)ms, dp_time, (int)rw_time, db_time, (int)se_time, de_time,
-				dv_time);
+				(int)ms, (double)dp_time, (int)rw_time, (double)db_time, (int)se_time,
+				(double)de_time, (double)dv_time);
 }
 
 

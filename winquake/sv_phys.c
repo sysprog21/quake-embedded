@@ -126,16 +126,17 @@ Returns false if the entity removed itself.
 qboolean SV_RunThink (edict_t *ent)
 {
 	float	thinktime;
+	float	_sv_time = (float)sv.time;
 
 	thinktime = ent->v.nextthink;
-	if (thinktime <= 0 || thinktime > sv.time + host_frametime)
+	if (thinktime <= 0.0F || thinktime > (_sv_time + host_frametime))
 		return true;
 		
-	if (thinktime < sv.time)
-		thinktime = sv.time;	// don't let things stay in the past.
+	if (thinktime < _sv_time)
+		thinktime = _sv_time;	// don't let things stay in the past.
 								// it is possible to start that way
 								// by a trigger with a local time.
-	ent->v.nextthink = 0;
+	ent->v.nextthink = 0.0F;
 	pr_global_struct->time = thinktime;
 	pr_global_struct->self = EDICT_TO_PROG(ent);
 	pr_global_struct->other = EDICT_TO_PROG(sv.edicts);
@@ -185,7 +186,7 @@ Slide off of the impacting object
 returns the blocked flags (1 = floor, 2 = step / wall)
 ==================
 */
-#define	STOP_EPSILON	0.1
+#define	STOP_EPSILON	0.1F
 
 int ClipVelocity (vec3_t in, vec3_t normal, vec3_t out, float overbounce)
 {
@@ -278,7 +279,7 @@ int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 		if (!trace.ent)
 			Sys_Error ("SV_FlyMove: !trace.ent");
 
-		if (trace.plane.normal[2] > 0.7)
+		if (trace.plane.normal[2] > 0.7F)
 		{
 			blocked |= 1;		// floor
 			if (trace.ent->v.solid == SOLID_BSP)
@@ -386,7 +387,7 @@ void SV_AddGravity (edict_t *ent)
 	else
 		ent_gravity = 1.0f;
 #endif
-	ent->v.velocity[2] -= ent_gravity * sv_gravity.value * (float)host_frametime;
+	ent->v.velocity[2] -= ent_gravity * sv_gravity.value * host_frametime;
 }
 
 
@@ -710,7 +711,7 @@ void SV_Physics_Pusher (edict_t *ent)
 	oldltime = ent->v.ltime;
 	
 	thinktime = ent->v.nextthink;
-	if (thinktime < ent->v.ltime + host_frametime)
+	if (thinktime < (ent->v.ltime + host_frametime))
 	{
 		movetime = thinktime - ent->v.ltime;
 		if (movetime < 0)
@@ -964,7 +965,7 @@ void SV_WalkMove (edict_t *ent)
 	int			oldonground;
 	trace_t		steptrace, downtrace;
 
-	float _host_frametime = (float)host_frametime;
+	float _host_frametime = host_frametime;
 	
 //
 // do a regular slide move unless it looks like you ran into a step
@@ -1560,9 +1561,9 @@ void SV_Physics (void)
 	}
 	
 	if (pr_global_struct->force_retouch)
-		pr_global_struct->force_retouch--;	
+		pr_global_struct->force_retouch--;
 
-	sv.time += host_frametime;
+	sv.time += (double)host_frametime;
 }
 
 

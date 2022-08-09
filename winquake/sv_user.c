@@ -148,7 +148,7 @@ void SV_UserFriction (void)
 
 // apply friction	
 	control = speed < sv_stopspeed.value ? sv_stopspeed.value : speed;
-	newspeed = speed - ((float)host_frametime)*control*friction;
+	newspeed = speed - host_frametime*control*friction;
 	
 	if (newspeed < 0)
 		newspeed = 0;
@@ -196,7 +196,7 @@ void SV_Accelerate (void)
 	addspeed = wishspeed - currentspeed;
 	if (addspeed <= 0)
 		return;
-	accelspeed = sv_accelerate.value*((float)host_frametime)*wishspeed;
+	accelspeed = sv_accelerate.value*host_frametime*wishspeed;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
 	
@@ -217,7 +217,7 @@ void SV_AirAccelerate (vec3_t wishveloc)
 	if (addspeed <= 0)
 		return;
 //	accelspeed = sv_accelerate.value * host_frametime;
-	accelspeed = sv_accelerate.value*wishspeed * (float)host_frametime;
+	accelspeed = sv_accelerate.value*wishspeed*host_frametime;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
 	
@@ -232,9 +232,9 @@ void DropPunchAngle (void)
 	
 	len = VectorNormalize (sv_player->v.punchangle);
 	
-	len -= 10.0f*(float)host_frametime;
-	if (len < 0)
-		len = 0;
+	len -= 10.0f*host_frametime;
+	if (len < 0.0F)
+		len = 0.0F;
 	VectorScale (sv_player->v.punchangle, len, sv_player->v.punchangle);
 }
 
@@ -250,7 +250,7 @@ void SV_WaterMove (void)
 	vec3_t	wishvel;
 	float	speed, newspeed, wishspeed, addspeed, accelspeed;
 
-	float _host_frametime = (float)host_frametime;
+	float _host_frametime = host_frametime;
 //
 // user intentions
 //
@@ -260,7 +260,7 @@ void SV_WaterMove (void)
 		wishvel[i] = forward[i]*cmd.forwardmove + right[i]*cmd.sidemove;
 
 	if (!cmd.forwardmove && !cmd.sidemove && !cmd.upmove)
-		wishvel[2] -= 60;		// drift towards bottom
+		wishvel[2] -= 60.0F;		// drift towards bottom
 	else
 		wishvel[2] += cmd.upmove;
 
@@ -279,12 +279,12 @@ void SV_WaterMove (void)
 	if (speed)
 	{
 		newspeed = speed - _host_frametime * speed * sv_friction.value;
-		if (newspeed < 0)
-			newspeed = 0;	
+		if (newspeed < 0.0F)
+			newspeed = 0.0F;
 		VectorScale (velocity, newspeed/speed, velocity);
 	}
 	else
-		newspeed = 0;
+		newspeed = 0.0F;
 	
 //
 // water acceleration
@@ -293,7 +293,7 @@ void SV_WaterMove (void)
 		return;
 
 	addspeed = wishspeed - newspeed;
-	if (addspeed <= 0)
+	if (addspeed <= 0.0F)
 		return;
 
 	VectorNormalize (wishvel);
@@ -307,11 +307,11 @@ void SV_WaterMove (void)
 
 void SV_WaterJump (void)
 {
-	if (sv.time > sv_player->v.teleport_time
-	|| !sv_player->v.waterlevel)
+	if (((float)sv.time > sv_player->v.teleport_time)
+		|| (sv_player->v.waterlevel != 0.0F))
 	{
 		sv_player->v.flags = (int)sv_player->v.flags & ~FL_WATERJUMP;
-		sv_player->v.teleport_time = 0;
+		sv_player->v.teleport_time = 0.0F;
 	}
 	sv_player->v.velocity[0] = sv_player->v.movedir[0];
 	sv_player->v.velocity[1] = sv_player->v.movedir[1];
@@ -336,8 +336,8 @@ void SV_AirMove (void)
 	smove = cmd.sidemove;
 	
 // hack to not let you back into teleporter
-	if (sv.time < sv_player->v.teleport_time && fmove < 0)
-		fmove = 0;
+	if ((float)sv.time < sv_player->v.teleport_time && fmove < 0.0F)
+		fmove = 0.0F;
 		
 	for (i=0 ; i<3 ; i++)
 		wishvel[i] = forward[i]*fmove + right[i]*smove;
@@ -444,7 +444,7 @@ void SV_ReadClientMove (usercmd_t *move)
 	
 // read ping time
 	host_client->ping_times[host_client->num_pings%NUM_PING_TIMES]
-		= sv.time - MSG_ReadFloat ();
+		= (float)sv.time - MSG_ReadFloat ();
 	host_client->num_pings++;
 
 // read current angles	

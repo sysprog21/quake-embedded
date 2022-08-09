@@ -38,7 +38,7 @@ void R_RotateSprite (float beamlength)
 {
 	vec3_t	vec;
 	
-	if (beamlength == 0.0)
+	if (beamlength == 0.0F)
 		return;
 
 	VectorScale (r_spritedesc.vpn, -beamlength, vec);
@@ -205,7 +205,7 @@ void R_SetupAndDrawSprite ()
 			transformed[2] = NEAR_CLIP;
 
 		pout = &outverts[i];
-		pout->zi = 1.0 / transformed[2];
+		pout->zi = 1.0F / transformed[2];
 		if (pout->zi > r_spritedesc.nearzi)
 			r_spritedesc.nearzi = pout->zi;
 
@@ -312,7 +312,7 @@ void R_DrawSprite (void)
 		VectorNormalize (tvec);
 		dot = tvec[2];	// same as DotProduct (tvec, r_spritedesc.vup) because
 						//  r_spritedesc.vup is 0, 0, 1
-		if ((dot > 0.999848) || (dot < -0.999848))	// cos(1 degree) = 0.999848
+		if ((dot > 0.999848F) || (dot < -0.999848F))	// cos(1 degree) = 0.999848
 			return;
 		r_spritedesc.vup[0] = 0;
 		r_spritedesc.vup[1] = 0;
@@ -351,7 +351,7 @@ void R_DrawSprite (void)
 	// the two vectors are less than 1 degree apart
 		dot = vpn[2];	// same as DotProduct (vpn, r_spritedesc.vup) because
 						//  r_spritedesc.vup is 0, 0, 1
-		if ((dot > 0.999848) || (dot < -0.999848))	// cos(1 degree) = 0.999848
+		if ((dot > 0.999848F) || (dot < -0.999848F))	// cos(1 degree) = 0.999848
 			return;
 		r_spritedesc.vup[0] = 0;
 		r_spritedesc.vup[1] = 0;

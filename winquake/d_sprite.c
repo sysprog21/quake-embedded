@@ -350,7 +350,7 @@ void D_SpriteCalculateGradients (void)
 	TransformVector (r_spritedesc.vup, p_taxis);
 	VectorInverse (p_taxis);
 
-	distinv = 1.0 / (-DotProduct (modelorg, r_spritedesc.vpn));
+	distinv = 1.0F / (-DotProduct (modelorg, r_spritedesc.vpn));
 
 	d_sdivzstepu = p_saxis[0] * xscaleinv;
 	d_tdivzstepu = p_taxis[0] * xscaleinv;

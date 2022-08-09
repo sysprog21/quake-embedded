@@ -184,6 +184,7 @@ lookspring is non 0, or when
 void V_DriftPitch (void)
 {
 	float		delta, move;
+	float		_host_frametime = host_frametime;
 
 	if (noclip_anglehack || !cl.onground || cls.demoplayback )
 	{
@@ -196,9 +197,9 @@ void V_DriftPitch (void)
 	if (cl.nodrift)
 	{
 		if ( fabsf(cl.cmd.forwardmove) < cl_forwardspeed.value)
-			cl.driftmove = 0;
+			cl.driftmove = 0.0F;
 		else
-			cl.driftmove += host_frametime;
+			cl.driftmove += _host_frametime;
 	
 		if ( cl.driftmove > v_centermove.value)
 		{
@@ -215,12 +216,12 @@ void V_DriftPitch (void)
 		return;
 	}
 
-	move = host_frametime * cl.pitchvel;
-	cl.pitchvel += host_frametime * v_centerspeed.value;
+	move = _host_frametime * cl.pitchvel;
+	cl.pitchvel += _host_frametime * v_centerspeed.value;
 	
 //Con_Printf ("move: %f (%f)\n", move, host_frametime);
 
-	if (delta > 0)
+	if (delta > 0.0F)
 	{
 		if (move > delta)
 		{
@@ -229,7 +230,7 @@ void V_DriftPitch (void)
 		}
 		cl.viewangles[PITCH] += move;
 	}
-	else if (delta < 0)
+	else if (delta < 0.0F)
 	{
 		if (move > -delta)
 		{
@@ -271,7 +272,7 @@ void BuildGammaTable (float g)
 {
 	int		i, inf;
 	
-	if (g == 1.0)
+	if (g == 1.0F)
 	{
 		for (i=0 ; i<256 ; i++)
 			gammatable[i] = i;
@@ -280,7 +281,7 @@ void BuildGammaTable (float g)
 	
 	for (i=0 ; i<256 ; i++)
 	{
-		inf = (int)(255.0f * powf ((i + 0.5) / 255.5, g) + 0.5f);
+		inf = (int)(255.0F * powf ((i + 0.5F) / 255.5F, g) + 0.5F);
 		if (inf < 0)
 			inf = 0;
 		if (inf > 255)
@@ -324,19 +325,19 @@ void V_ParseDamage (void)
 	entity_t	*ent;
 	float	side;
 	float	count;
-	
+
 	armor = MSG_ReadByte ();
 	blood = MSG_ReadByte ();
 	for (i=0 ; i<3 ; i++)
 		from[i] = MSG_ReadCoord ();
 
-	count = blood*0.5 + armor*0.5;
-	if (count < 10)
-		count = 10;
+	count = 0.5F * (float)(blood + armor);
+	if (count < 10.0F)
+		count = 10.0F;
 
-	cl.faceanimtime = cl.time + 0.2;		// but sbar face into pain frame
+	cl.faceanimtime = cl.time + 0.2F;		// but sbar face into pain frame
 
-	cl.cshifts[CSHIFT_DAMAGE].percent += 3*count;
+	cl.cshifts[CSHIFT_DAMAGE].percent += (int)(3.0F*count);
 	if (cl.cshifts[CSHIFT_DAMAGE].percent < 0)
 		cl.cshifts[CSHIFT_DAMAGE].percent = 0;
 	if (cl.cshifts[CSHIFT_DAMAGE].percent > 150)
@@ -642,12 +643,12 @@ void V_UpdatePalette (void)
 	}
 	
 // drop the damage value
-	cl.cshifts[CSHIFT_DAMAGE].percent -= host_frametime*150;
+	cl.cshifts[CSHIFT_DAMAGE].percent -= host_frametime*150.0F;
 	if (cl.cshifts[CSHIFT_DAMAGE].percent <= 0)
 		cl.cshifts[CSHIFT_DAMAGE].percent = 0;
 
 // drop the bonus value
-	cl.cshifts[CSHIFT_BONUS].percent -= host_frametime*100;
+	cl.cshifts[CSHIFT_BONUS].percent -= host_frametime*100.0F;
 	if (cl.cshifts[CSHIFT_BONUS].percent <= 0)
 		cl.cshifts[CSHIFT_BONUS].percent = 0;
 
@@ -713,17 +714,17 @@ void CalcGunAngle (void)
 	yaw = r_refdef.viewangles[YAW];
 	pitch = -r_refdef.viewangles[PITCH];
 
-	yaw = angledelta(yaw - r_refdef.viewangles[YAW]) * 0.4;
-	if (yaw > 10)
-		yaw = 10;
-	if (yaw < -10)
-		yaw = -10;
-	pitch = angledelta(-pitch - r_refdef.viewangles[PITCH]) * 0.4;
-	if (pitch > 10)
-		pitch = 10;
-	if (pitch < -10)
-		pitch = -10;
-	move = host_frametime*20;
+	yaw = angledelta(yaw - r_refdef.viewangles[YAW]) * 0.4F;
+	if (yaw > 10.0F)
+		yaw = 10.0F;
+	if (yaw < -10.0F)
+		yaw = -10.0F;
+	pitch = angledelta(-pitch - r_refdef.viewangles[PITCH]) * 0.4F;
+	if (pitch > 10.0F)
+		pitch = 10.0F;
+	if (pitch < -10.0F)
+		pitch = -10.0F;
+	move = host_frametime*20.0F;
 	if (yaw > oldyaw)
 	{
 		if (oldyaw + move < yaw)
@@ -897,9 +898,9 @@ void V_CalcRefdef (void)
 // never let it sit exactly on a node line, because a water plane can
 // dissapear when viewed with the eye exactly on it.
 // the server protocol only specifies to 1/16 pixel, so add 1/32 in each axis
-	r_refdef.vieworg[0] += 1.0/32;
-	r_refdef.vieworg[1] += 1.0/32;
-	r_refdef.vieworg[2] += 1.0/32;
+	r_refdef.vieworg[0] += 1.0F/32.0F;
+	r_refdef.vieworg[1] += 1.0F/32.0F;
+	r_refdef.vieworg[2] += 1.0F/32.0F;
 
 	VectorCopy (cl.viewangles, r_refdef.viewangles);
 	V_CalcViewRoll ();
@@ -931,9 +932,9 @@ void V_CalcRefdef (void)
 
 	for (i=0 ; i<3 ; i++)
 	{
-		view->origin[i] += forward[i]*bob*0.4;
-//		view->origin[i] += right[i]*bob*0.4;
-//		view->origin[i] += up[i]*bob*0.8;
+		view->origin[i] += forward[i]*bob*0.4F;
+//		view->origin[i] += right[i]*bob*0.4F;
+//		view->origin[i] += up[i]*bob*0.8F;
 	}
 	view->origin[2] += bob;
 
@@ -943,14 +944,14 @@ void V_CalcRefdef (void)
 #if 0
 	if (cl.model_precache[cl.stats[STAT_WEAPON]] && strcmp (cl.model_precache[cl.stats[STAT_WEAPON]]->name,  "progs/v_shot2.mdl"))
 #endif
-	if (scr_viewsize.value == 110)
-		view->origin[2] += 1;
-	else if (scr_viewsize.value == 100)
-		view->origin[2] += 2;
-	else if (scr_viewsize.value == 90)
-		view->origin[2] += 1;
-	else if (scr_viewsize.value == 80)
-		view->origin[2] += 0.5;
+	if (scr_viewsize.value == 110.0F)
+		view->origin[2] += 1.0F;
+	else if (scr_viewsize.value == 100.0F)
+		view->origin[2] += 2.0F;
+	else if (scr_viewsize.value == 90.0F)
+		view->origin[2] += 1.0F;
+	else if (scr_viewsize.value == 80.0F)
+		view->origin[2] += 0.5F;
 
 	view->model = cl.model_precache[cl.stats[STAT_WEAPON]];
 	view->frame = cl.stats[STAT_WEAPONFRAME];
@@ -960,7 +961,7 @@ void V_CalcRefdef (void)
 	VectorAdd (r_refdef.viewangles, cl.punchangle, r_refdef.viewangles);
 
 // smooth out stair step ups
-if (cl.onground && ent->origin[2] - oldz > 0)
+if (cl.onground && ent->origin[2] - oldz > 0.0F)
 {
 	float steptime;
 	
@@ -1027,7 +1028,7 @@ void V_RenderView (void)
 		int		i;
 
 		vid.rowbytes <<= 1;
-		vid.aspect *= 0.5;
+		vid.aspect *= 0.5F;
 
 		r_refdef.viewangles[YAW] -= lcd_yaw.value;
 		for (i=0 ; i<3 ; i++)
@@ -1038,9 +1039,9 @@ void V_RenderView (void)
 
 		R_PushDlights ();
 
-		r_refdef.viewangles[YAW] += lcd_yaw.value*2;
+		r_refdef.viewangles[YAW] += lcd_yaw.value*2.0F;
 		for (i=0 ; i<3 ; i++)
-			r_refdef.vieworg[i] += 2*right[i]*lcd_x.value;
+			r_refdef.vieworg[i] += 2.0F*right[i]*lcd_x.value;
 		R_RenderView ();
 
 		vid.buffer -= vid.rowbytes>>1;
@@ -1048,7 +1049,7 @@ void V_RenderView (void)
 		r_refdef.vrect.height <<= 1;
 
 		vid.rowbytes >>= 1;
-		vid.aspect *= 2;
+		vid.aspect *= 2.0F;
 	}
 	else
 	{

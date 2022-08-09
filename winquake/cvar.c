@@ -135,8 +135,8 @@ Cvar_SetValue
 void Cvar_SetValue (char *var_name, float value)
 {
 	char	val[32];
-	
-	sprintf (val, "%f",value);
+
+	sprintf (val, "%f", (double)value);
 	Cvar_Set (var_name, val);
 }
 

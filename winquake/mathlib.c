@@ -24,7 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
 vec3_t vec3_origin = {0,0,0};
-int nanmask = 255<<23;
 
 /*-----------------------------------------------------------------*/
 
@@ -97,6 +96,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 	float	zrot[3][3];
 	float	tmpmat[3][3];
 	float	rot[3][3];
+	float	radians;
 	int	i;
 	vec3_t vr, vup, vf;
 
@@ -131,10 +131,11 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 	memset( zrot, 0, sizeof( zrot ) );
 	zrot[0][0] = zrot[1][1] = zrot[2][2] = 1.0F;
 
-	zrot[0][0] = cosf( DEG2RAD( degrees ) );
-	zrot[0][1] = sinf( DEG2RAD( degrees ) );
-	zrot[1][0] = -sinf( DEG2RAD( degrees ) );
-	zrot[1][1] = cosf( DEG2RAD( degrees ) );
+	radians = DEG2RAD( degrees );
+	zrot[0][0] = cosf( radians );
+	zrot[0][1] = sinf( radians );
+	zrot[1][0] = -sinf( radians );
+	zrot[1][1] = cosf( radians );
 
 	R_ConcatRotations( m, zrot, tmpmat );
 	R_ConcatRotations( tmpmat, im, rot );
@@ -155,10 +156,10 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 float	anglemod(float a)
 {
 #if 0
-	if (a >= 0)
-		a -= 360*(int)(a/360);
+	if (a >= 0.0F)
+		a -= 360*(int)(a * (1.0F/360.0F));
 	else
-		a += 360*( 1 + (int)(-a/360) );
+		a += 360*(1 - (int)(a * (1.0F/360.0F)) );
 #endif
 	a = (360.0f/65536.0f) * ((int)(a*(65536.0f/360.0f)) & 65535);
 	return a;
@@ -294,13 +295,13 @@ void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 	float		angle;
 	float		sr, sp, sy, cr, cp, cy;
 	
-	angle = angles[YAW] * (M_PI*2 / 360);
+	angle = DEG2RAD(angles[YAW]);
 	sy = sinf(angle);
 	cy = cosf(angle);
-	angle = angles[PITCH] * (M_PI*2 / 360);
+	angle = DEG2RAD(angles[PITCH]);
 	sp = sinf(angle);
 	cp = cosf(angle);
-	angle = angles[ROLL] * (M_PI*2 / 360);
+	angle = DEG2RAD(angles[ROLL]);
 	sr = sinf(angle);
 	cr = cosf(angle);
 
@@ -495,40 +496,47 @@ quotient must fit in 32 bits.
 ====================
 */
 
-void FloorDivMod (double numer, double denom, int *quotient,
-		int *rem)
+static inline int FastFloor(float x)
+{
+#if 0
+	return ((int)(x + 32768.0F)) - 32768;
+#else
+	int i = (int)x;
+	if ((float)i > x)
+		--i;
+	return i;
+#endif
+}
+
+void FloorDivMod (float numer, float denom, int *quotient, int *rem)
 {
 	int		q, r;
-	double	x;
 
-#ifndef PARANOID
-	if (denom <= 0.0)
-		Sys_Error ("FloorDivMod: bad denominator %d\n", denom);
+#ifdef PARANOID
+	if (denom <= 0.0F)
+		Sys_Error ("FloorDivMod: bad denominator %d\n", (int)denom);
 
-//	if ((floor(numer) != numer) || (floor(denom) != denom))
+//	if ((floorf(numer) != numer) || (floorf(denom) != denom))
 //		Sys_Error ("FloorDivMod: non-integer numer or denom %f %f\n",
-//				numer, denom);
+//				(double)numer, (double)denom);
 #endif
 
-	if (numer >= 0.0)
+	if (numer >= 0.0F)
 	{
-
-		x = floor(numer / denom);
-		q = (int)x;
-		r = (int)floor(numer - (x * denom));
+		q = FastFloor(numer / denom);
+		r = FastFloor(numer - (((float)q) * denom));
 	}
 	else
 	{
 	//
 	// perform operations with positive values, and fix mod to make floor-based
 	//
-		x = floor(-numer / denom);
-		q = -(int)x;
-		r = (int)floor(-numer - (x * denom));
+		q = -FastFloor(-numer / denom);
+		r = FastFloor(-numer - (((float)(-q)) * denom));
 		if (r != 0)
 		{
-			q--;
-			r = (int)denom - r;
+			--q;
+			r = ((int)denom) - r;
 		}
 	}
 
@@ -558,26 +566,3 @@ int GreatestCommonDivisor (int i1, int i2)
 	}
 }
 
-
-#if	!id386
-
-// TODO: move to nonintel.c
-
-/*
-===================
-Invert24To16
-
-Inverts an 8.24 value to a 16.16 value
-====================
-*/
-
-fixed16_t Invert24To16(fixed16_t val)
-{
-	if (val < 256)
-		return (0xFFFFFFFF);
-
-	return (fixed16_t)
-			(((double)0x10000 * (double)0x1000000 / (double)val) + 0.5f);
-}
-
-#endif
