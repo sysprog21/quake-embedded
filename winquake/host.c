@@ -54,7 +54,6 @@ jmp_buf 	host_abortserver;
 byte		*host_basepal;
 byte		*host_colormap;
 
-cvar_t	host_framerate = {"host_framerate","0"};	// set for slow motion
 cvar_t	host_speeds = {"host_speeds","0"};			// set for running times
 
 cvar_t	sys_ticrate = {"sys_ticrate","0.05"};
@@ -209,7 +208,6 @@ Host_InitLocal
 void Host_InitLocal (void)
 {
 	Host_InitCommands ();
-	Cvar_RegisterVariable (&host_framerate);
 	Cvar_RegisterVariable (&host_speeds);
 	Cvar_RegisterVariable (&sys_ticrate);
 	Cvar_RegisterVariable (&serverprofile);
@@ -506,16 +504,12 @@ qboolean Host_FilterTime (float time)
 	host_frametime = realtime - oldrealtime;
 	oldrealtime = realtime;
 
-	if (host_framerate.value > 0)
-		host_frametime = host_framerate.value;
-	else
-	{	// don't allow really long or short frames
-		if (host_frametime > 0.1)
-			host_frametime = 0.1;
-		if (host_frametime < 0.001)
-			host_frametime = 0.001;
-	}
-	
+	// don't allow really long or short frame
+	if (host_frametime > 0.1)
+		host_frametime = 0.1;
+	else if (host_frametime < 0.001)
+		host_frametime = 0.001;
+
 	return true;
 }
 
