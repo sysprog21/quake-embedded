@@ -228,7 +228,7 @@ void D_DrawSurfaces (void)
 			// effectively at infinity distance from the viewpoint
 				d_zistepu = 0;
 				d_zistepv = 0;
-				d_ziorigin = -0.9;
+				d_ziorigin = -0.9F;
 
 				D_DrawSolidSurface (s, (int)r_clearcolor.value & 0xFF);
 				D_DrawZSpans (s->spans);
