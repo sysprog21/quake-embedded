@@ -52,7 +52,6 @@ int			clearnotify;
 
 viddef_t	vid;				// global video state
 
-vrect_t		*pconupdate;
 vrect_t		scr_vrect;
 
 qboolean	scr_disabled_for_loading;
@@ -738,9 +737,6 @@ void SCR_UpdateScreen (void)
 		Sbar_Changed ();
 	}
 
-	pconupdate = NULL;
-
-
 	SCR_SetUpToDrawConsole ();
 	SCR_EraseCenterString ();
 
@@ -790,13 +786,6 @@ void SCR_UpdateScreen (void)
 		Sbar_Draw ();
 		SCR_DrawConsole ();
 		M_Draw ();
-	}
-
-	D_DisableBackBufferAccess ();	// for adapters that can't stay mapped in
-									//  for linear writes all the time
-	if (pconupdate)
-	{
-		D_UpdateRects (pconupdate);
 	}
 
 	V_UpdatePalette ();

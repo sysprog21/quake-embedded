@@ -164,7 +164,6 @@ void D_WarpScreen (void);
 
 void D_FillRect (vrect_t *vrect, int color);
 void D_DrawRect (void);
-void D_UpdateRects (vrect_t *prect);
 
 // currently for internal use only, and should be a do-nothing function in
 // hardware drivers
