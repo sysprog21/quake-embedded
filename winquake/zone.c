@@ -137,7 +137,6 @@ void *Z_Malloc (int size)
 {
 	void	*buf;
 	
-Z_CheckHeap ();	// DEBUG
 	buf = Z_TagMalloc (size, 1);
 	if (!buf)
 		Sys_Error ("Z_Malloc: failed on allocation of %i bytes",size);
