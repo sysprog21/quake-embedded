@@ -252,6 +252,7 @@ void Turbulent8 (espan_t *pspan)
 /*
 =============
 D_DrawSpans8
+Note: This function is the top CPU consumer. Optimize it as far as possible!
 =============
 */
 void D_DrawSpans8 (espan_t *pspan)
@@ -261,20 +262,35 @@ void D_DrawSpans8 (espan_t *pspan)
 	fixed16_t		s, t, snext, tnext, sstep, tstep;
 	float			sdivz, tdivz, zi, z, du, dv, spancountminus1;
 	float			sdivz8stepu, tdivz8stepu, zi8stepu;
-
 	sstep = 0;	// keep compiler happy
 	tstep = 0;	// ditto
 
 	pbase = (unsigned char *)cacheblock;
 
-	sdivz8stepu = d_sdivzstepu * 8;
-	tdivz8stepu = d_tdivzstepu * 8;
-	zi8stepu = d_zistepu * 8;
+	byte *viewbuffer = (byte *)d_viewbuffer;
+	int _screenwidth = screenwidth;
+	float _d_sdivzorigin = d_sdivzorigin;
+	float _d_sdivzstepv = d_sdivzstepv;
+	float _d_sdivzstepu = d_sdivzstepu;
+	float _d_tdivzorigin = d_tdivzorigin;
+	float _d_tdivzstepv = d_tdivzstepv;
+	float _d_tdivzstepu = d_tdivzstepu;
+	float _d_ziorigin = d_ziorigin;
+	float _d_zistepv = d_zistepv;
+	float _d_zistepu = d_zistepu;
+	fixed16_t _sadjust = sadjust;
+	fixed16_t _tadjust = tadjust;
+	fixed16_t _bbextents = bbextents;
+	fixed16_t _bbextentt = bbextentt;
+	int _cachewidth = cachewidth;
+
+	sdivz8stepu = _d_sdivzstepu * 8;
+	tdivz8stepu = _d_tdivzstepu * 8;
+	zi8stepu = _d_zistepu * 8;
 
 	do
 	{
-		pdest = (unsigned char *)((byte *)d_viewbuffer +
-				(screenwidth * pspan->v) + pspan->u);
+		pdest = (unsigned char *)&viewbuffer[(_screenwidth * pspan->v) + pspan->u];
 
 		count = pspan->count;
 
@@ -282,20 +298,20 @@ void D_DrawSpans8 (espan_t *pspan)
 		du = (float)pspan->u;
 		dv = (float)pspan->v;
 
-		sdivz = d_sdivzorigin + dv*d_sdivzstepv + du*d_sdivzstepu;
-		tdivz = d_tdivzorigin + dv*d_tdivzstepv + du*d_tdivzstepu;
-		zi = d_ziorigin + dv*d_zistepv + du*d_zistepu;
+		sdivz = _d_sdivzorigin + dv*_d_sdivzstepv + du*_d_sdivzstepu;
+		tdivz = _d_tdivzorigin + dv*_d_tdivzstepv + du*_d_tdivzstepu;
+		zi = _d_ziorigin + dv*_d_zistepv + du*_d_zistepu;
 		z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
 
-		s = (int)(sdivz * z) + sadjust;
-		if (s > bbextents)
-			s = bbextents;
+		s = (int)(sdivz * z) + _sadjust;
+		if (s > _bbextents)
+			s = _bbextents;
 		else if (s < 0)
 			s = 0;
 
-		t = (int)(tdivz * z) + tadjust;
-		if (t > bbextentt)
-			t = bbextentt;
+		t = (int)(tdivz * z) + _tadjust;
+		if (t > _bbextentt)
+			t = _bbextentt;
 		else if (t < 0)
 			t = 0;
 
@@ -318,17 +334,17 @@ void D_DrawSpans8 (espan_t *pspan)
 				zi += zi8stepu;
 				z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
 
-				snext = (int)(sdivz * z) + sadjust;
-				if (snext > bbextents)
-					snext = bbextents;
+				snext = (int)(sdivz * z) + _sadjust;
+				if (snext > _bbextents)
+					snext = _bbextents;
 				else if (snext < 8)
 					snext = 8;	// prevent round-off error on <0 steps from
 								//  from causing overstepping & running off the
 								//  edge of the texture
 
-				tnext = (int)(tdivz * z) + tadjust;
-				if (tnext > bbextentt)
-					tnext = bbextentt;
+				tnext = (int)(tdivz * z) + _tadjust;
+				if (tnext > _bbextentt)
+					tnext = _bbextentt;
 				else if (tnext < 8)
 					tnext = 8;	// guard against round-off error on <0 steps
 
@@ -342,21 +358,21 @@ void D_DrawSpans8 (espan_t *pspan)
 			// span by division, biasing steps low so we don't run off the
 			// texture
 				spancountminus1 = (float)(spancount - 1);
-				sdivz += d_sdivzstepu * spancountminus1;
-				tdivz += d_tdivzstepu * spancountminus1;
-				zi += d_zistepu * spancountminus1;
+				sdivz += _d_sdivzstepu * spancountminus1;
+				tdivz += _d_tdivzstepu * spancountminus1;
+				zi += _d_zistepu * spancountminus1;
 				z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
-				snext = (int)(sdivz * z) + sadjust;
-				if (snext > bbextents)
-					snext = bbextents;
+				snext = (int)(sdivz * z) + _sadjust;
+				if (snext > _bbextents)
+					snext = _bbextents;
 				else if (snext < 8)
 					snext = 8;	// prevent round-off error on <0 steps from
 								//  from causing overstepping & running off the
 								//  edge of the texture
 
-				tnext = (int)(tdivz * z) + tadjust;
-				if (tnext > bbextentt)
-					tnext = bbextentt;
+				tnext = (int)(tdivz * z) + _tadjust;
+				if (tnext > _bbextentt)
+					tnext = _bbextentt;
 				else if (tnext < 8)
 					tnext = 8;	// guard against round-off error on <0 steps
 
@@ -369,7 +385,7 @@ void D_DrawSpans8 (espan_t *pspan)
 
 			do
 			{
-				*pdest++ = *(pbase + (s >> 16) + (t >> 16) * cachewidth);
+				*pdest++ = pbase[(s >> 16) + (t >> 16) * _cachewidth];
 				s += sstep;
 				t += tstep;
 			} while (--spancount > 0);
@@ -405,9 +421,15 @@ void D_DrawZSpans (espan_t *pspan)
 // we count on FP exceptions being turned off to avoid range problems
 	izistep = (int)(d_zistepu * 0x8000 * 0x10000);
 
+	short *_d_pzbuffer = d_pzbuffer;
+	unsigned int _d_zwidth= d_zwidth;
+	float _d_ziorigin = d_ziorigin;
+	float _d_zistepu = d_zistepu;
+	float _d_zistepv = d_zistepv;
+
 	do
 	{
-		pdest = d_pzbuffer + (d_zwidth * pspan->v) + pspan->u;
+		pdest = _d_pzbuffer + (_d_zwidth * pspan->v) + pspan->u;
 
 		count = pspan->count;
 
@@ -415,7 +437,7 @@ void D_DrawZSpans (espan_t *pspan)
 		du = (float)pspan->u;
 		dv = (float)pspan->v;
 
-		zi = d_ziorigin + dv*d_zistepv + du*d_zistepu;
+		zi = _d_ziorigin + dv*_d_zistepv + du*_d_zistepu;
 	// we count on FP exceptions being turned off to avoid range problems
 		izi = (int)(zi * 0x8000 * 0x10000);
 

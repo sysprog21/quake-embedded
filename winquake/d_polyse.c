@@ -621,19 +621,33 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage)
 	int		lzi;
 	short	*lpz;
 
+	byte *cmap = (byte *)acolormap;
+	int _r_zistepx = r_zistepx;
+	int _r_lstepx = r_lstepx;
+	int _a_ststepxwhole = a_ststepxwhole;
+	int _a_sstepxfrac = a_sstepxfrac;
+	int _a_tstepxfrac = a_tstepxfrac;
+	int _skinwidth = r_affinetridesc.skinwidth;
+	int _d_aspancount = d_aspancount;
+	int _errorterm = errorterm;
+	int _erroradjustup = erroradjustup;
+	int _erroradjustdown = erroradjustdown;
+	int _d_countextrastep = d_countextrastep;
+	int _ubasestep = ubasestep;
+
 	do
 	{
-		lcount = d_aspancount - pspanpackage->count;
+		lcount = _d_aspancount - pspanpackage->count;
 
-		errorterm += erroradjustup;
-		if (errorterm >= 0)
+		_errorterm += _erroradjustup;
+		if (_errorterm >= 0)
 		{
-			d_aspancount += d_countextrastep;
-			errorterm -= erroradjustdown;
+			_d_aspancount += _d_countextrastep;
+			_errorterm -= _erroradjustdown;
 		}
 		else
 		{
-			d_aspancount += ubasestep;
+			_d_aspancount += _ubasestep;
 		}
 
 		if (lcount)
@@ -650,22 +664,22 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage)
 			{
 				if ((lzi >> 16) >= *lpz)
 				{
-					*lpdest = ((byte *)acolormap)[*lptex + (llight & 0xFF00)];
+					*lpdest = cmap[*lptex + (llight & 0xFF00)];
 // gel mapping					*lpdest = gelmap[*lpdest];
 					*lpz = lzi >> 16;
 				}
 				lpdest++;
-				lzi += r_zistepx;
+				lzi += _r_zistepx;
 				lpz++;
-				llight += r_lstepx;
-				lptex += a_ststepxwhole;
-				lsfrac += a_sstepxfrac;
+				llight += _r_lstepx;
+				lptex += _a_ststepxwhole;
+				lsfrac += _a_sstepxfrac;
 				lptex += lsfrac >> 16;
 				lsfrac &= 0xFFFF;
-				ltfrac += a_tstepxfrac;
+				ltfrac += _a_tstepxfrac;
 				if (ltfrac & 0x10000)
 				{
-					lptex += r_affinetridesc.skinwidth;
+					lptex += _skinwidth;
 					ltfrac &= 0xFFFF;
 				}
 			} while (--lcount);
@@ -673,6 +687,9 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage)
 
 		pspanpackage++;
 	} while (pspanpackage->count != -999999);
+
+	d_aspancount = _d_aspancount;
+	errorterm = _errorterm;
 }
 #endif	// !id386
 
