@@ -388,57 +388,99 @@ void Draw_TransPic (int x, int y, qpic_t *pic)
 {
 	byte	*dest, *source, tbyte;
 	unsigned short	*pusdest;
-	int				v, u;
+	int				w, h, i, j;
+	fixed16_t		du, dv, u, v;
 
-	if (x < 0 || (unsigned)(x + pic->width) > vid.width || y < 0 ||
-		 (unsigned)(y + pic->height) > vid.height)
+	if (x < 0 || y < 0)
 	{
 		Sys_Error ("Draw_TransPic: bad coordinates");
 	}
-		
-	source = pic->data;
+
+	// Scale image to fit the screen width and height.
+	// This is a hack to make things fit on screens with a resolution lower
+	// than 320x200.
+	w = pic->width;
+	h = pic->height;
+	if (x + w > vid.width)
+	{
+		w = vid.width - x;
+		if (w < 1)
+			return;
+		du = (pic->width << 16) / w;
+	}
+	else
+	{
+		du = 0x10000;
+	}
+	if (y + h > vid.height)
+	{
+		h = vid.height - y;
+		if (h < 1)
+			return;
+		dv = (pic->height << 16) / h;
+	}
+	else
+	{
+		dv = 0x10000;
+	}
 
 	if (r_pixbytes == 1)
 	{
 		dest = vid.buffer + y * vid.rowbytes + x;
 
-		if (pic->width & 7)
+		if (w & 7 != 0)
 		{	// general
-			for (v=0 ; v<pic->height ; v++)
+			v = 0;
+			for (i=0 ; i<h ; i++)
 			{
-				for (u=0 ; u<pic->width ; u++)
-					if ( (tbyte=source[u]) != TRANSPARENT_COLOR)
-						dest[u] = tbyte;
-	
+				source = pic->data + (v >> 16) * pic->width;
+				u = 0;
+				for (j=0 ; j<w ; j++)
+				{
+					if ( (tbyte=source[u >> 16]) != TRANSPARENT_COLOR)
+						dest[j] = tbyte;
+					u += du;
+				}
 				dest += vid.rowbytes;
-				source += pic->width;
+				v += dv;
 			}
 		}
 		else
 		{	// unwound
-			for (v=0 ; v<pic->height ; v++)
+			v = 0;
+			for (i=0 ; i<h ; i++)
 			{
-				for (u=0 ; u<pic->width ; u+=8)
+				source = pic->data + (v >> 16) * pic->width;
+				u = 0;
+				for (j=0 ; j<w ; j+=8)
 				{
-					if ( (tbyte=source[u]) != TRANSPARENT_COLOR)
-						dest[u] = tbyte;
-					if ( (tbyte=source[u+1]) != TRANSPARENT_COLOR)
-						dest[u+1] = tbyte;
-					if ( (tbyte=source[u+2]) != TRANSPARENT_COLOR)
-						dest[u+2] = tbyte;
-					if ( (tbyte=source[u+3]) != TRANSPARENT_COLOR)
-						dest[u+3] = tbyte;
-					if ( (tbyte=source[u+4]) != TRANSPARENT_COLOR)
-						dest[u+4] = tbyte;
-					if ( (tbyte=source[u+5]) != TRANSPARENT_COLOR)
-						dest[u+5] = tbyte;
-					if ( (tbyte=source[u+6]) != TRANSPARENT_COLOR)
-						dest[u+6] = tbyte;
-					if ( (tbyte=source[u+7]) != TRANSPARENT_COLOR)
-						dest[u+7] = tbyte;
+					if ( (tbyte=source[u >> 16]) != TRANSPARENT_COLOR)
+						dest[j] = tbyte;
+					u += du;
+					if ( (tbyte=source[u >> 16]) != TRANSPARENT_COLOR)
+						dest[j+1] = tbyte;
+					u += du;
+					if ( (tbyte=source[u >> 16]) != TRANSPARENT_COLOR)
+						dest[j+2] = tbyte;
+					u += du;
+					if ( (tbyte=source[u >> 16]) != TRANSPARENT_COLOR)
+						dest[j+3] = tbyte;
+					u += du;
+					if ( (tbyte=source[u >> 16]) != TRANSPARENT_COLOR)
+						dest[j+4] = tbyte;
+					u += du;
+					if ( (tbyte=source[u >> 16]) != TRANSPARENT_COLOR)
+						dest[j+5] = tbyte;
+					u += du;
+					if ( (tbyte=source[u >> 16]) != TRANSPARENT_COLOR)
+						dest[j+6] = tbyte;
+					u += du;
+					if ( (tbyte=source[u >> 16]) != TRANSPARENT_COLOR)
+						dest[j+7] = tbyte;
+					u += du;
 				}
 				dest += vid.rowbytes;
-				source += pic->width;
+				v += dv;
 			}
 		}
 	}
@@ -447,20 +489,23 @@ void Draw_TransPic (int x, int y, qpic_t *pic)
 	// FIXME: pretranslate at load time?
 		pusdest = (unsigned short *)vid.buffer + y * (vid.rowbytes >> 1) + x;
 
-		for (v=0 ; v<pic->height ; v++)
+		v = 0;
+		for (i=0 ; i<h ; i++)
 		{
-			for (u=0 ; u<pic->width ; u++)
+			source = pic->data + (v >> 16) * pic->width;
+			u = 0;
+			for (j=0 ; j<w ; j++)
 			{
-				tbyte = source[u];
-
+				tbyte = source[u >> 16];
 				if (tbyte != TRANSPARENT_COLOR)
 				{
-					pusdest[u] = d_8to16table[tbyte];
+					pusdest[j] = d_8to16table[tbyte];
 				}
+				u += du;
 			}
 
 			pusdest += vid.rowbytes >> 1;
-			source += pic->width;
+			v += dv;
 		}
 	}
 }
