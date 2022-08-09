@@ -395,9 +395,6 @@ void Con_Printf (char *fmt, ...)
 	if (!con_initialized)
 		return;
 		
-	if (cls.state == ca_dedicated)
-		return;		// no graphics mode
-
 // write it to the scrollable buffer
 	Con_Print (msg);
 	

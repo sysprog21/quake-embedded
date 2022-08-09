@@ -157,15 +157,6 @@ int qembd_main(int c, char **v)
 		newtime = Sys_FloatTime();
 		time = newtime - oldtime;
 
-		if (cls.state == ca_dedicated) {
-			// play vcrfiles at max speed
-			if (time < sys_ticrate.value && (vcrFile == -1 || recording)) {
-				qembd_udelay(1);
-				continue;	// not time to run a server only tic yet
-			}
-			time = sys_ticrate.value;
-		}
-
 		if (time > sys_ticrate.value*2)
 			oldtime = newtime;
 		else

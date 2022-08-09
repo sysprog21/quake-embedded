@@ -1002,11 +1002,10 @@ void SV_SendReconnect (void)
 	MSG_WriteString (&msg, "reconnect\n");
 	NET_SendToAll (&msg, 5);
 	
-	if (cls.state != ca_dedicated)
 #ifdef QUAKE2
-		Cbuf_InsertText ("reconnect\n");
+	Cbuf_InsertText ("reconnect\n");
 #else
-		Cmd_ExecuteString ("reconnect\n", src_command);
+	Cmd_ExecuteString ("reconnect\n", src_command);
 #endif
 }
 
