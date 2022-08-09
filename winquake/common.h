@@ -19,10 +19,8 @@ typedef unsigned char 		byte;
 #define BYTE_DEFINED 1
 #endif
 
-#undef true
-#undef false
-
-typedef enum {false, true}	qboolean;
+#include <stdbool.h>
+typedef _Bool qboolean;
 
 //============================================================================
 
