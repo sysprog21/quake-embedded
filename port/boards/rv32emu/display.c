@@ -17,8 +17,8 @@
 
 #include <quakembd.h>
 
-#define	DISPLAY_WIDTH 640
-#define	DISPLAY_HEIGHT 384
+#define	DISPLAY_WIDTH 480
+#define	DISPLAY_HEIGHT ((DISPLAY_WIDTH * 9 + 8) / 16)
 
 static uint32_t buffer[DISPLAY_WIDTH * DISPLAY_HEIGHT];
 
