@@ -117,12 +117,15 @@ int qembd_dequeue_key_event(key_event_t *e)
 				e->keycode = K_RIGHTARROW;
 				break;
 			case 0x400000E2:
+			case 0x400000E6:
 				e->keycode = K_ALT;
 				break;
 			case 0x400000E0:
+			case 0x400000E4:
 				e->keycode = K_CTRL;
 				break;
 			case 0x400000E1:
+			case 0x400000E5:
 				e->keycode = K_SHIFT;
 				break;
 			case 0x4000003A:
