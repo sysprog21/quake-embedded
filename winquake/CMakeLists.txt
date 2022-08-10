@@ -38,7 +38,6 @@ set(WQ_SRCS
 	d_zpoint.c
 	net_loop.c
 	net_main.c
-	net_vcr.c
 	pr_cmds.c
 	pr_edict.c
 	pr_exec.c
