@@ -73,6 +73,7 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
 	msurface_t	*surf;
 	int			i;
 	
+start:
 	if (node->contents < 0)
 		return;
 
@@ -81,13 +82,13 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
 	
 	if (dist > light->radius)
 	{
-		R_MarkLights (light, bit, node->children[0]);
-		return;
+		node = node->children[0];
+		goto start;
 	}
 	if (dist < -light->radius)
 	{
-		R_MarkLights (light, bit, node->children[1]);
-		return;
+		node = node->children[1];
+		goto start;
 	}
 		
 // mark the polygons
