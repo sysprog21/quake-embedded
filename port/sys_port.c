@@ -121,8 +121,6 @@ int qembd_main(int c, char **v)
 {
 	float time, oldtime, newtime;
 	quakeparms_t parms = {0};
-	extern int vcrFile;
-	extern qboolean recording;
 	int j;
 
 	COM_InitArgv(c, v);

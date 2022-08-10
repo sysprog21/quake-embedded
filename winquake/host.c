@@ -383,7 +383,7 @@ void Host_ShutdownServer(qboolean crash)
 	int		i;
 	int		count;
 	sizebuf_t	buf;
-	char		message[4];
+	byte		message[4];
 	double	start;
 
 	if (!sv.active)

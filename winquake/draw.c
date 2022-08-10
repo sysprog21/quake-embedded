@@ -426,7 +426,7 @@ void Draw_TransPic (int x, int y, qpic_t *pic)
 	{
 		dest = vid.buffer + y * vid.rowbytes + x;
 
-		if (w & 7 != 0)
+		if ((w & 7) != 0)
 		{	// general
 			v = 0;
 			for (i=0 ; i<h ; i++)
