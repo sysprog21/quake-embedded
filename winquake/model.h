@@ -125,6 +125,15 @@ typedef struct msurface_s
 	byte		*samples;		// [numstyles*surfsize]
 } msurface_t;
 
+/*
+ * foreach_surf_lightstyle()
+ *   Iterator for lightmaps on a surface
+ *     msurface_t *s => the surface
+ *     int n         => lightmap number
+ */
+#define foreach_surf_lightstyle(s, n) \
+	for ((n) = 0; (n) < MAXLIGHTMAPS && (s)->styles[n] != 255; (n)++)
+
 typedef struct mnode_s
 {
 // common with leaf
