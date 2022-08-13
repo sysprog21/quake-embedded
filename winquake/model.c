@@ -81,7 +81,7 @@ void *Mod_Extradata (model_t *mod)
 Mod_PointInLeaf
 ===============
 */
-mleaf_t *Mod_PointInLeaf (vec3_t p, model_t *model)
+mleaf_t *Mod_PointInLeaf (const vec3_t p, model_t *model)
 {
 	mnode_t		*node;
 	float		d;
