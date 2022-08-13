@@ -27,6 +27,13 @@ typedef	int	fixed4_t;
 typedef	int	fixed8_t;
 typedef	int	fixed16_t;
 
+/* min and max macros with type checking */
+#define qmax(a, b) ((a > b) ? a : b)
+#define qmin(a, b) ((a < b) ? a : b)
+
+/* clamp macro with type checking */
+#define qclamp(var, min, max) qmax(qmin(var, max), min)
+
 #ifdef M_PI
 #undef M_PI
 #endif
