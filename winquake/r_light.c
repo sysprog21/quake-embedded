@@ -152,6 +152,7 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	int maps, lightlevel;
 	int			i;
 
+restart:
 	if (node->contents < 0)
 		return -1;		// didn't hit anything
 	
@@ -163,8 +164,11 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	back = DotProduct (end, plane->normal) - plane->dist;
 	side = front < 0;
 	
-	if ( (back < 0) == side)
-		return RecursiveLightPoint (node->children[side], start, end);
+	if ( (back < 0) == side) {
+		/* Completely on one side - tail recursion optimization */
+		node = node->children[side];
+		goto restart;
+	}
 	
 	frac = front / (front-back);
 	mid[0] = start[0] + (end[0] - start[0])*frac;
