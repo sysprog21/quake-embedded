@@ -255,10 +255,7 @@ void R_NewMap (void)
 	r_viewleaf = NULL;
 	R_ClearParticles ();
 
-	r_cnumsurfs = r_maxsurfs.value;
-
-	if (r_cnumsurfs <= MINSURFACES)
-		r_cnumsurfs = MINSURFACES;
+	r_cnumsurfs = qclamp((int)r_maxsurfs.value, MINSURFACES, MAXSURFACES);
 
 	if (r_cnumsurfs > NUMSTACKSURFACES)
 	{
@@ -279,10 +276,7 @@ void R_NewMap (void)
 	r_maxedgesseen = 0;
 	r_maxsurfsseen = 0;
 
-	r_numallocatededges = r_maxedges.value;
-
-	if (r_numallocatededges < MINEDGES)
-		r_numallocatededges = MINEDGES;
+	r_numallocatededges = qclamp((int)r_maxedges.value, MINEDGES, MAXEDGES);
 
 	if (r_numallocatededges <= NUMSTACKEDGES)
 	{

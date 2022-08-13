@@ -62,10 +62,19 @@ extern	vec3_t	vpn, base_vpn;
 extern	vec3_t	vright, base_vright;
 extern	entity_t		*currententity;
 
-#define NUMSTACKEDGES		2400
-#define	MINEDGES			NUMSTACKEDGES
-#define NUMSTACKSURFACES	800
+/*
+ * Min edges/surfaces are just a reasonable number to play the
+ * original id/hipnotic/rouge maps.  Surfaces we want to reference
+ * using shorts to pack the edge_t struct into cache lines, so the
+ * upper limit on those is 16 bits.  Edges is just 32 bit limited, but
+ * no need for quite that many if we don't have the surfs.
+ */
+#define NUMSTACKEDGES			2400
+#define NUMSTACKSURFACES   		800
 #define MINSURFACES			NUMSTACKSURFACES
+#define MINEDGES			NUMSTACKEDGES
+#define MAXSURFACES			0xffff
+#define MAXEDGES			(MAXSURFACES << 2)
 #define	MAXSPANS			3000
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
@@ -156,7 +165,7 @@ typedef struct edge_s
 	fixed16_t		u;
 	fixed16_t		u_step;
 	struct edge_s	*prev, *next;
-	unsigned short	surfs[2];
+	uint16_t	surfs[2];
 	struct edge_s	*nextremove;
 	float			nearzi;
 	medge_t			*owner;
