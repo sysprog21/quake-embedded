@@ -78,14 +78,72 @@ void InsertLinkAfter (link_t *l, link_t *after);
 
 //============================================================================
 
-extern	qboolean		bigendien;
+/*
+ * ========================================================================
+ *                          BYTE ORDER FUNCTIONS
+ * ========================================================================
+ */
 
-extern	short	(*BigShort) (short l);
-extern	short	(*LittleShort) (short l);
-extern	int	(*BigLong) (int l);
-extern	int	(*LittleLong) (int l);
-extern	float	(*BigFloat) (float l);
-extern	float	(*LittleFloat) (float l);
+#undef MSB_FIRST
+#undef LSB_FIRST
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define MSB_FIRST 1
+#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define LSB_FIRST 1
+#else
+#error "Invalid endianness macros"
+#endif
+
+static inline short bswap16(short s) {
+	return ((s & 255) << 8) | ((s >> 8) & 255);
+}
+static inline int bswap32(int l) {
+	return
+		(((l >>  0) & 255) << 24)
+		| (((l >>  8) & 255) << 16)
+		| (((l >> 16) & 255) <<  8)
+		| (((l >> 24) & 255) <<  0);
+}
+
+#ifdef MSB_FIRST
+static inline short BigShort(short s) { return s; }
+static inline int BigLong(int l) { return l; }
+static inline float BigFloat(float f) { return f; }
+static inline short LittleShort(short s) { return bswap16(s); }
+static inline int LittleLong(int l) { return bswap32(l); }
+static inline float LittleFloat(float f) {
+	union {
+		float f;
+		byte b[4];
+	} dat1, dat2;
+
+	dat1.f = f;
+	dat2.b[0] = dat1.b[3];
+	dat2.b[1] = dat1.b[2];
+	dat2.b[2] = dat1.b[1];
+	dat2.b[3] = dat1.b[0];
+	return dat2.f;
+}
+#else
+static inline short BigShort(short s) { return bswap16(s); }
+static inline int BigLong(int l) { return bswap32(l); }
+static inline float BigFloat(float f) {
+	union {
+		float f;
+		byte b[4];
+	} dat1, dat2;
+
+	dat1.f = f;
+	dat2.b[0] = dat1.b[3];
+	dat2.b[1] = dat1.b[2];
+	dat2.b[2] = dat1.b[1];
+	dat2.b[3] = dat1.b[0];
+	return dat2.f;
+}
+static inline short LittleShort(short s) { return s; }
+static inline int LittleLong(int l) { return l; }
+static inline float LittleFloat(float f) { return f; }
+#endif
 
 //============================================================================
 
