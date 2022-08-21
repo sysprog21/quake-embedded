@@ -73,7 +73,7 @@ void qembd_udelay(uint32_t us)
 }
 
 int main(int c, char **v)
-{
+{	
 	return qembd_main(c, v);
 }
 
@@ -213,4 +213,11 @@ int qembd_get_mouse_movement(mouse_movement_t *movement)
 	mouse_movement.x = 0;
 	mouse_movement.y = 0;
 	return 0;
+}
+
+void qembd_set_relative_mode(bool enabled) {
+	register int a0 asm("a0") = enabled;
+	register int a7 asm("a7") = 0xfeed;
+
+	asm volatile("scall" : : "r"(a0), "r"(a7));
 }
