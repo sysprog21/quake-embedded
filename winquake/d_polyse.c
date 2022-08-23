@@ -131,6 +131,9 @@ void D_PolysetDraw (void)
 	a_spans = (spanpackage_t *)
 			(((long)&spans[0] + CACHE_SIZE - 1) & ~(CACHE_SIZE - 1));
 
+#if defined(USE_FIXEDPOINT)
+	D_DrawNonSubdiv ();
+#else
 	if (r_affinetridesc.drawtype)
 	{
 		D_DrawSubdiv ();
@@ -139,6 +142,7 @@ void D_PolysetDraw (void)
 	{
 		D_DrawNonSubdiv ();
 	}
+#endif
 }
 
 
@@ -528,6 +532,7 @@ void D_PolysetSetUpForLineScan(fixed8_t startvertu, fixed8_t startvertv,
 D_PolysetCalcGradients
 ================
 */
+#if !defined(USE_FIXEDPOINT)
 void D_PolysetCalcGradients (int skinwidth)
 {
 	float	xstepdenominv, ystepdenominv, t0, t1;
@@ -583,6 +588,52 @@ void D_PolysetCalcGradients (int skinwidth)
 
 	a_ststepxwhole = skinwidth * (r_tstepx >> 16) + (r_sstepx >> 16);
 }
+#else /* USE_FIXEDPOINT */
+void D_PolysetCalcGradients (int skinwidth)
+{
+	/* Fixed point conversion */
+	int t0, t1;
+	int tmp, ydenom;
+
+	int p00_minus_p20 = (r_p0[0] - r_p2[0]);
+	int p01_minus_p21 = (r_p0[1] - r_p2[1]);
+	int p10_minus_p20 = (r_p1[0] - r_p2[0]);
+	int p11_minus_p21 = (r_p1[1] - r_p2[1]);
+
+	ydenom = -d_xdenom;
+
+	t0 = (r_p0[4] - r_p2[4]);
+	t1 = (r_p1[4] - r_p2[4]);
+	/* TODO: Ceil has been removed */
+	tmp=t1 * p01_minus_p21 - t0 * p11_minus_p21;
+	r_lstepx = tmp / d_xdenom;
+	if (tmp % d_xdenom)
+		r_lstepx++;
+
+	tmp=t1 * p00_minus_p20 - t0 * p10_minus_p20;
+	r_lstepy = tmp / ydenom;
+	if (tmp % ydenom)
+		r_lstepy++;
+	t0 = (r_p0[2] - r_p2[2]);
+	t1 = (r_p1[2] - r_p2[2]);
+	r_sstepx = (t1 * p01_minus_p21 - t0 * p11_minus_p21) / d_xdenom;
+	r_sstepy = (t1 * p00_minus_p20 - t0* p10_minus_p20) / ydenom;
+
+	t0 = (r_p0[3] - r_p2[3]);
+	t1 = (r_p1[3] - r_p2[3]);
+	r_tstepx = (t1 * p01_minus_p21 - t0 * p11_minus_p21) / d_xdenom;
+	r_tstepy = (t1 * p00_minus_p20 - t0 * p10_minus_p20) / ydenom;
+
+	t0 = (r_p0[5] - r_p2[5]);
+	t1 = (r_p1[5] - r_p2[5]);
+	r_zistepx = (t1 * p01_minus_p21 - t0 * p11_minus_p21) / d_xdenom;
+	r_zistepy = (t1 * p00_minus_p20 - t0 * p10_minus_p20) / ydenom;
+
+	a_sstepxfrac = r_sstepx & 0xFFFF;
+	a_tstepxfrac = r_tstepx & 0xFFFF;
+	a_ststepxwhole = skinwidth * (r_tstepx >> 16) + (r_sstepx >> 16);
+}
+#endif
 
 #endif	// !id386
 

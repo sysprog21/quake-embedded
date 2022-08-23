@@ -94,7 +94,23 @@ typedef struct clipplane_s
 	byte		reserved[2];
 } clipplane_t;
 
+#if defined(USE_FIXEDPOINT)
+typedef struct clipplane_fxp_s
+{
+	int			normal[3];
+	int			dist;
+	struct		clipplane_fxp_s	*next;
+	byte		leftedge;
+	byte		rightedge;
+	byte		reserved[2];
+} clipplane_fxp_t;
+#endif
+
 extern	clipplane_t	view_clipplanes[4];
+
+#if defined(USE_FIXEDPOINT)
+extern	clipplane_fxp_t	view_clipplanes_fxp[4];
+#endif
 
 //=============================================================================
 
@@ -276,6 +292,9 @@ extern int		r_outofsurfaces;
 extern int		r_outofedges;
 
 extern mvertex_t	*r_pcurrentvertbase;
+#if defined(USE_FIXEDPOINT)
+extern mvertex_fxp_t	*r_pcurrentvertbase_fxp;
+#endif
 extern int			r_maxvalidedgeoffset;
 
 void R_AliasClipTriangle (mtriangle_t *ptri);

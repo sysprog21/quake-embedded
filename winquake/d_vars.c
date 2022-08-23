@@ -37,6 +37,12 @@ float	d_sdivzstepu, d_tdivzstepu, d_zistepu;
 float	d_sdivzstepv, d_tdivzstepv, d_zistepv;
 float	d_sdivzorigin, d_tdivzorigin, d_ziorigin;
 
+#if defined(USE_FIXEDPOINT)
+int sdivzstepu, tdivzstepu, zistepu;
+int sdivzstepv, tdivzstepv, zistepv;
+int sdivzorigin, tdivzorigin, ziorigin;
+#endif
+
 fixed16_t	sadjust, tadjust, bbextents, bbextentt;
 
 pixel_t			*cacheblock;

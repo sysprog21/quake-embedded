@@ -288,6 +288,22 @@ void R_TransformFrustum (void)
 		VectorCopy (v2, view_clipplanes[i].normal);
 
 		view_clipplanes[i].dist = DotProduct (modelorg, v2);
+
+#if defined(USE_FIXEDPOINT)
+		if (!v2[0])
+			view_clipplanes_fxp[i].normal[0] = 2 << 29;
+		else
+			view_clipplanes_fxp[i].normal[0] = (int)(4096.0f / v2[0]);
+		if (!v2[1])
+			view_clipplanes_fxp[i].normal[1] = 2 << 29;
+		else
+			view_clipplanes_fxp[i].normal[1] = (int)(4096.0f / v2[1]);
+		if (!v2[2])
+			view_clipplanes_fxp[i].normal[2] = 2 << 29;
+		else view_clipplanes_fxp[i].normal[2] = (int)(4096.0f / v2[2]);
+
+		view_clipplanes_fxp[i].dist = (int)(view_clipplanes[i].dist * 128.0);
+#endif
 	}
 }
 

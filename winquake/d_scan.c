@@ -276,6 +276,7 @@ D_DrawSpans8
 Note: This function is the top CPU consumer. Optimize it as far as possible!
 =============
 */
+#if !defined(USE_FIXEDPOINT)
 void D_DrawSpans8 (espan_t *pspan)
 {
 	int				count, spancount;
@@ -419,6 +420,167 @@ void D_DrawSpans8 (espan_t *pspan)
 	} while ((pspan = pspan->pnext) != NULL);
 }
 
+#else /* USE_FIXEDPOINT */
+static int sdivzorig, sdivzstepv, sdivzstepu, sdivzstepu_fix;
+static int tdivzorig, tdivzstepv, tdivzstepu, tdivzstepu_fix;
+static int d_zistepu_fxp, d_zistepv_fxp, d_ziorigin_fxp;
+static int zistepu_fix;
+
+//  524288.0f is 13.19 fixed point
+// 2097152.0f is 11.21
+// 4194304.0f is 10.22 (this is what PocketQuake used)
+// 8388608.0f is 9.23
+#define  FIXPOINTDIV 4194304.0f
+
+static inline void UpdateFixedPointVars16(void)
+{
+	// Store texture transformation matrix in fixed point vars
+	sdivzorig = (int)(FIXPOINTDIV * d_sdivzorigin);
+	tdivzorig = (int)(FIXPOINTDIV * d_tdivzorigin);
+	sdivzstepv = (int)(FIXPOINTDIV * d_sdivzstepv);
+	tdivzstepv = (int)(FIXPOINTDIV * d_tdivzstepv);
+	sdivzstepu = (int)(FIXPOINTDIV * d_sdivzstepu);
+	sdivzstepu_fix = sdivzstepu*16;
+	tdivzstepu = (int)(FIXPOINTDIV * d_tdivzstepu);
+	tdivzstepu_fix = tdivzstepu*16;
+
+	d_ziorigin_fxp = (int)(FIXPOINTDIV * d_ziorigin);
+	d_zistepv_fxp = (int)(FIXPOINTDIV * d_zistepv );
+	d_zistepu_fxp = (int)(FIXPOINTDIV * d_zistepu );
+
+	zistepu_fix = d_zistepu_fxp * 16;
+}
+
+void D_DrawSpans8 (espan_t *pspan)
+{
+	int count, spancount, spancountminus1;
+	unsigned char *pbase, *pdest;
+	fixed16_t s, t;
+	int zi, sdivz, tdivz, sstep, tstep;
+	int snext, tnext;
+	pbase = (unsigned char *)cacheblock;
+
+	/* Recalc fixed point values */
+	UpdateFixedPointVars16();
+	do
+	{
+		pdest = (unsigned char *)((byte *)d_viewbuffer + (screenwidth * pspan->v) + pspan->u);
+
+		// calculate the initial s/z, t/z, 1/z, s, and t and clamp
+		sdivz = sdivzorig + pspan->v * sdivzstepv + pspan->u * sdivzstepu;
+		tdivz = tdivzorig + pspan->v * tdivzstepv + pspan->u * tdivzstepu;
+		zi = d_ziorigin_fxp + pspan->v * d_zistepv_fxp + pspan->u * d_zistepu_fxp;
+		if (zi == 0) zi = 1;
+		s = (((sdivz << 8) / zi) << 8) + sadjust;   // 5.27 / 13.19 = 24.8 >> 8 = 16.16
+		if (s > bbextents) s = bbextents; else if (s < 0) s = 0;
+		t = (((tdivz << 8) / zi) << 8) + tadjust;
+		if (t > bbextentt) t = bbextentt; else if (t < 0) t = 0;
+
+		count = pspan->count >> 4;
+		spancount = pspan->count % 16;
+
+		while (count-- >0)
+		{
+			// calculate s/z, t/z, zi->fixed s and t at far end of span,
+			// calculate s and t steps across span by shifting
+			sdivz += sdivzstepu_fix;
+			tdivz += tdivzstepu_fix;
+			zi += zistepu_fix;
+			if (!zi) zi = 1;
+
+			snext = (((sdivz<<8)/zi)<<8)+sadjust;
+			if (snext > bbextents)
+				snext = bbextents;
+			else if (snext < 16)
+				snext = 16;   // prevent round-off error on <0 steps from causing overstepping & running off the edge of the texture
+
+			tnext = (((tdivz<<8)/zi)<<8) + tadjust;
+			if (tnext > bbextentt)
+				tnext = bbextentt;
+			else if (tnext < 16)
+				tnext = 16;   // guard against round-off error on <0 steps
+
+			sstep = (snext - s) >> 4;
+			tstep = (tnext - t) >> 4;
+
+			pdest += 16;
+			pdest[-16] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+			pdest[-15] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+			pdest[-14] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+			pdest[-13] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+			pdest[-12] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+			pdest[-11] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+			pdest[-10] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+			pdest[ -9] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+			pdest[ -8] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+			pdest[ -7] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+			pdest[ -6] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+			pdest[ -5] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+			pdest[ -4] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+			pdest[ -3] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+			pdest[ -2] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+			pdest[ -1] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+
+			s = snext;
+			t = tnext;
+		}
+		if (spancount > 0)
+		{
+			// calculate s/z, t/z, zi->fixed s and t at last pixel in span (so
+			// can't step off polygon), clamp, calculate s and t steps across
+			// span by division, biasing steps low so we don't run off the
+			// texture
+
+			spancountminus1 = spancount - 1;
+			sdivz += sdivzstepu * spancountminus1;
+			tdivz += tdivzstepu * spancountminus1;
+			zi += d_zistepu_fxp * spancountminus1;
+			//if (!zi) zi = 1;
+			//z = zi;//(float)0x10000 / zi;   // prescale to 16.16 fixed-point
+			snext = (((sdivz<<8) / zi)<<8) + sadjust;
+			if (snext > bbextents)
+				snext = bbextents;
+			else if (snext < 16)
+				snext = 16;   // prevent round-off error on <0 steps from causing overstepping & running off the edge of the texture
+
+			tnext = (((tdivz<<8) / zi)<<8) + tadjust;
+			if (tnext > bbextentt)
+				tnext = bbextentt;
+			else if (tnext < 16)
+				tnext = 16;   // guard against round-off error on <0 steps
+
+			if (spancount > 1)
+			{
+				sstep = ((snext - s)) / ((spancount - 1));
+				tstep = ((tnext - t)) / ((spancount - 1));
+			}
+
+			pdest += spancount;
+			switch (spancount)
+			{
+				case 16: pdest[-16] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+				case 15: pdest[-15] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+				case 14: pdest[-14] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+				case 13: pdest[-13] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+				case 12: pdest[-12] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+				case 11: pdest[-11] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+				case 10: pdest[-10] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+				case  9: pdest[ -9] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+				case  8: pdest[ -8] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+				case  7: pdest[ -7] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+				case  6: pdest[ -6] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+				case  5: pdest[ -5] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+				case  4: pdest[ -4] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+				case  3: pdest[ -3] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+				case  2: pdest[ -2] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+				case  1: pdest[ -1] = pbase[(s >> 16) + (t >> 16) * cachewidth]; s += sstep; t += tstep;
+					 break;
+			}
+
+		}
+	} while ((pspan = pspan->pnext));
+}
+#endif
 #endif
 
 

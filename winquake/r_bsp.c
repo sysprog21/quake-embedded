@@ -27,6 +27,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 qboolean		insubmodel;
 entity_t		*currententity;
+
+#if defined(USE_FIXEDPOINT)
+int			modelorg_fxp[3];
+#endif
+
 vec3_t			modelorg, base_modelorg;
 								// modelorg is the viewpoint reletive to
 								// the currently rendering entity
@@ -439,6 +444,10 @@ void R_DrawSubmodelPolygons (model_t *pmodel, int clipflags)
 	}
 }
 
+#if defined(USE_FIXEDPOINT)
+int	clipplanes_fxp[4][3];
+int	clipdist_fxp[4];
+#endif
 
 /*
 ================
@@ -452,7 +461,13 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 	mplane_t	*plane;
 	msurface_t	*surf, **mark;
 	mleaf_t		*pleaf;
-	float		d, dot;
+	float		dot;
+
+#if defined(USE_FIXEDPOINT)
+	int		d_fxp;
+#else
+	float		d;
+#endif
 
 	if (node->contents == CONTENTS_SOLID)
 		return;		// solid
@@ -476,6 +491,23 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 
 			pindex = pfrustum_indexes[i];
 
+#if defined(USE_FIXEDPOINT)
+			d_fxp = node->minmaxs[pindex[0]] * clipplanes_fxp[i][0] +
+			        node->minmaxs[pindex[1]] * clipplanes_fxp[i][1] +
+			        node->minmaxs[pindex[2]] * clipplanes_fxp[i][2];
+			d_fxp -= clipdist_fxp[i];
+
+			if (d_fxp <= 0) 
+				return;
+
+			d_fxp = node->minmaxs[pindex[3]] * clipplanes_fxp[i][0] +
+			        node->minmaxs[pindex[4]] * clipplanes_fxp[i][1] +
+			        node->minmaxs[pindex[5]] * clipplanes_fxp[i][2];
+			d_fxp -= clipdist_fxp[i];
+
+			if (d_fxp >= 0)
+				clipflags &= ~(1<<i);	/* node is entirely on screen */
+#else
 			rejectpt[0] = (float)node->minmaxs[pindex[0]];
 			rejectpt[1] = (float)node->minmaxs[pindex[1]];
 			rejectpt[2] = (float)node->minmaxs[pindex[2]];
@@ -495,6 +527,7 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 
 			if (d >= 0)
 				clipflags &= ~(1<<i);	// node is entirely on screen
+#endif
 		}
 	}
 	
@@ -655,8 +688,81 @@ void R_RenderWorld (void)
 
 	currententity = &cl_entities[0];
 	VectorCopy (r_origin, modelorg);
+
+#if defined(USE_FIXEDPOINT)
+	modelorg_fxp[0] = (int)(r_origin[0] * 524288.0);
+	modelorg_fxp[1] = (int)(r_origin[1] * 524288.0);
+	modelorg_fxp[2] = (int)(r_origin[2] * 524288.0);
+
+	vright_fxp[0] = (int)(256.0 / vright[0]);
+	if (!vright_fxp[0])
+		vright_fxp[0] = 0x7fffffff;
+	vright_fxp[1] = (int)(256.0 / vright[1]);
+	if (!vright_fxp[1])
+		vright_fxp[1] = 0x7fffffff;
+	vright_fxp[2] = (int)(256.0 / vright[2]);
+	if (!vright_fxp[2])
+		vright_fxp[2] = 0x7fffffff;
+
+	vpn_fxp[0] = (int)(256.0 / vpn[0]);
+	if (!vpn_fxp[0])
+		vpn_fxp[0] = 0x7fffffff;
+	vpn_fxp[1] = (int)(256.0 / vpn[1]);
+	if (!vpn_fxp[1])
+		vpn_fxp[1] = 0x7fffffff;
+	vpn_fxp[2] = (int)(256.0 / vpn[2]);
+	if (!vpn_fxp[2])
+		vpn_fxp[2] = 0x7fffffff;
+
+	vup_fxp[0] = (int)(256.0 / vup[0]);
+	if (!vup_fxp[0])
+		vup_fxp[0] = 0x7fffffff;
+	vup_fxp[1] = (int)(256.0 / vup[1]);
+	if (!vup_fxp[1])
+		vup_fxp[1] = 0x7fffffff;
+	vup_fxp[2] = (int)(256.0 / vup[2]);
+	if (!vup_fxp[2])
+		vup_fxp[2]=0x7fffffff;
+#endif
+
 	clmodel = currententity->model;
 	r_pcurrentvertbase = clmodel->vertexes;
+
+#if defined(USE_FIXEDPOINT)
+	r_pcurrentvertbase_fxp = clmodel->vertexes_fxp;
+
+	for (i = 0; i < 4; i++) {
+		clipplanes_fxp[i][0] = (int)(view_clipplanes[i].normal[0] * 65536.0);
+		clipplanes_fxp[i][1] = (int)(view_clipplanes[i].normal[1] * 65536.0);
+		clipplanes_fxp[i][2] = (int)(view_clipplanes[i].normal[2] * 65536.0);
+		clipdist_fxp[i] = (int)(view_clipplanes[i].dist * 65536.0);
+
+		view_clipplanes_fxp[i].leftedge = view_clipplanes[i].leftedge;
+		view_clipplanes_fxp[i].rightedge = view_clipplanes[i].rightedge;
+		if (!view_clipplanes[i].normal[0])
+			view_clipplanes_fxp[i].normal[0] = 2 << 29;
+		else
+			view_clipplanes_fxp[i].normal[0] = (int)(4096.0f / view_clipplanes[i].normal[0]);
+		if (!view_clipplanes[i].normal[0])
+			view_clipplanes_fxp[i].normal[0] = 2 << 29;
+
+		if (!view_clipplanes[i].normal[1])
+			view_clipplanes_fxp[i].normal[1] = 2 << 29;
+		else
+			view_clipplanes_fxp[i].normal[1] = (int)(4096.0f / view_clipplanes[i].normal[1]);
+		if (!view_clipplanes[i].normal[1])
+			view_clipplanes_fxp[i].normal[1] = 2 << 29;
+
+		if (!view_clipplanes[i].normal[2])
+			view_clipplanes_fxp[i].normal[2] = 2 << 29;
+		else
+			view_clipplanes_fxp[i].normal[2] = (int)(4096.0f / view_clipplanes[i].normal[2]);
+		if (!view_clipplanes[i].normal[2])
+			view_clipplanes_fxp[i].normal[2] =2 << 29;
+
+		view_clipplanes_fxp[i].dist = (int)(view_clipplanes[i].dist * 128.0f);
+	}
+#endif
 
 	R_RecursiveWorldNode (clmodel->nodes, 15);
 

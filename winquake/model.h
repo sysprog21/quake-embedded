@@ -49,6 +49,13 @@ typedef struct
 	vec3_t		position;
 } mvertex_t;
 
+#if defined(USE_FIXEDPOINT)
+typedef struct
+{
+	int		position[3];
+} mvertex_fxp_t;
+#endif
+
 #define	SIDE_FRONT	0
 #define	SIDE_BACK	1
 #define	SIDE_ON		2
@@ -339,6 +346,10 @@ typedef struct model_s
 
 	int			numvertexes;
 	mvertex_t	*vertexes;
+
+#if defined(USE_FIXEDPOINT)
+	mvertex_fxp_t	*vertexes_fxp;
+#endif
 
 	int			numedges;
 	medge_t		*edges;
