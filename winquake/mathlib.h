@@ -31,6 +31,7 @@ typedef	int	fixed16_t;
 #define qmax(a, b) ((a > b) ? a : b)
 #define qmin(a, b) ((a < b) ? a : b)
 
+#define bound(a, b, c) ((a) >= (c) ? (a) : (b) < (a) ? (a) : (b) > (c) ? (c) : (b))
 /* clamp macro with type checking */
 #define qclamp(var, min, max) qmax(qmin(var, max), min)
 
