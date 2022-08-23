@@ -544,25 +544,43 @@ void FloorDivMod (float numer, float denom, int *quotient, int *rem)
 	*rem = r;
 }
 
+#define SWAP(x, y, T) do { T SWAP = x; x = y; y = SWAP; } while (0)
 
 /*
 ===================
 GreatestCommonDivisor
 ====================
 */
-int GreatestCommonDivisor (int i1, int i2)
+int GreatestCommonDivisor (int a, int b)
 {
-	if (i1 > i2)
-	{
-		if (i2 == 0)
-			return (i1);
-		return GreatestCommonDivisor (i2, i1 % i2);
-	}
-	else
-	{
-		if (i1 == 0)
-			return (i2);
-		return GreatestCommonDivisor (i1, i2 % i1);
+	int r = a | b;
+
+	if (!a || !b)
+		return r;
+
+	/* Isolate lsbit of r */
+	r &= -r;
+
+	while (!(b & r))
+		b >>= 1;
+	if (b == r)
+		return r;
+
+	while (1) {
+		while (!(a & r))
+			a >>= 1;
+		if (a == r)
+			return r;
+		if (a == b)
+			return a;
+
+		if (a < b)
+			SWAP(a, b, int);
+		a -= b;
+		a >>= 1;
+		if (a & r)
+			a += b;
+		a >>= 1;
 	}
 }
 
