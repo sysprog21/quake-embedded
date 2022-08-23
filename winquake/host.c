@@ -675,7 +675,7 @@ void _Host_Frame (float time)
 
 
 
-	host_time += host_frametime;
+	host_time += (double) host_frametime;
 
 // fetch results from server
 	if (cls.state == ca_connected)
@@ -778,7 +778,7 @@ void Host_Init (quakeparms_t *parms)
 	host_parms = *parms;
 
 	if (parms->memsize < minimum_memory)
-		Sys_Error ("Only %4.1f megs of memory available, can't execute game", parms->memsize / (float)0x100000);
+		Sys_Error ("Only %4.1f megs of memory available, can't execute game", parms->memsize / (double)0x100000);
 
 	com_argc = parms->argc;
 	com_argv = parms->argv;
