@@ -22,9 +22,11 @@
 #include <time.h>
 #include <unistd.h>
 
-#define MOUSE_BUTTON_LEFT 1
-#define MOUSE_BUTTON_MIDDLE 2
-#define MOUSE_BUTTON_RIGHT 3
+enum {
+	MOUSE_BUTTON_LEFT = 1,
+	MOUSE_BUTTON_MIDDLE = 2,
+	MOUSE_BUTTON_RIGHT = 3,
+};
 
 enum {
 	KEY_EVENT = 0,
@@ -48,6 +50,39 @@ typedef struct {
 	};
 } event_t;
 
+typedef struct {
+	event_t *base;
+	size_t start;
+} event_queue_t;
+
+enum {
+	RELATIVE_MODE_SUBMISSION = 0,
+};
+
+typedef struct {
+	uint32_t type;
+	union {
+		union {
+			uint8_t enabled;
+		} mouse;
+	};
+} submission_t;
+
+typedef struct {
+	submission_t *base;
+	size_t end;
+} submission_queue_t;
+
+static const int queues_capacity = 128;
+static unsigned int event_count;
+static event_queue_t event_queue = {
+	.base = NULL,
+	.start = 0,
+};
+static submission_queue_t submission_queue = {
+	.base = NULL,
+	.end = 0,
+};
 static event_t event;
 static mouse_movement_t mouse_movement;
 
@@ -74,6 +109,15 @@ void qembd_udelay(uint32_t us)
 
 int main(int c, char **v)
 {
+	void *base = malloc(sizeof(event_t) * queues_capacity + 
+						sizeof(submission_t) * queues_capacity);
+	event_queue.base = base;
+	submission_queue.base = base + sizeof(event_t) * queues_capacity;
+	register int a0 asm("a0") = (uintptr_t) base;
+	register int a1 asm("a1") = queues_capacity;
+	register int a2 asm("a2") = (uintptr_t) (&event_count);
+	register int a7 asm("a7") = 0xc0de;
+	asm volatile("scall" : "+r"(a0) : "r"(a1), "r"(a2), "r"(a7));
 	return qembd_main(c, v);
 }
 
@@ -84,14 +128,18 @@ void *qembd_allocmain(size_t size)
 
 static int poll_event()
 {
-	register int a0 asm("a0") = (uintptr_t) &event;
-	register int a7 asm("a7") = 0xc0de;
-	asm volatile("scall" : "+r"(a0) : "r"(a7));
+	if (event_count <= 0)
+		return 0;
+	event = event_queue.base[event_queue.start++];
+	event_queue.start &= queues_capacity - 1;
+	--event_count;
+
 	if (event.type == MOUSE_MOTION_EVENT) {
 		mouse_movement.x += event.mouse.motion.xrel;
 		mouse_movement.y += event.mouse.motion.yrel;
 	}
-	return a0;
+
+	return 1;
 }
 
 int qembd_dequeue_key_event(key_event_t *e)
