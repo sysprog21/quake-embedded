@@ -58,13 +58,11 @@ typedef struct {
 } key_event_t;
 
 typedef struct {
-	int32_t xrel;
-	int32_t yrel;
+	int32_t xrel, yrel;
 } mouse_motion_t;
 
 typedef struct {
-	int32_t x;
-	int32_t y;
+	int32_t x, y;
 } mouse_movement_t;
 
 int qembd_get_width();
