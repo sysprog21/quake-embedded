@@ -107,6 +107,17 @@ void qembd_udelay(uint32_t us)
 		end = qembd_get_us_time();
 }
 
+void qembd_set_relative_mode(bool enabled) {
+	submission_t submission;
+	submission.type = RELATIVE_MODE_SUBMISSION;
+	submission.mouse.enabled = enabled;
+	submission_queue.base[submission_queue.end++] = submission;
+	submission_queue.end &= queues_capacity - 1;
+	register int a0 asm("a0") = 1;
+	register int a7 asm("a7") = 0xfeed;
+	asm volatile("scall" : "+r"(a0) : "r"(a7));
+}
+
 int main(int c, char **v)
 {
 	void *base = malloc(sizeof(event_t) * queues_capacity + 
@@ -118,6 +129,7 @@ int main(int c, char **v)
 	register int a2 asm("a2") = (uintptr_t) (&event_count);
 	register int a7 asm("a7") = 0xc0de;
 	asm volatile("scall" : "+r"(a0) : "r"(a1), "r"(a2), "r"(a7));
+	qembd_set_relative_mode(true);
 	return qembd_main(c, v);
 }
 
