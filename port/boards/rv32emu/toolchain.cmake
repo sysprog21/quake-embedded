@@ -12,6 +12,6 @@ set(CMAKE_SIZE ${TOOLCHAIN_PREFIX}size)
 
 set(ARCH_FLAGS "-march=rv32imf -mabi=ilp32 -Ofast -flto")
 
-set(CMAKE_C_FLAGS "${ARCH_FLAGS} -std=gnu11 -Wall -ffunction-sections -fdata-sections")
+set(CMAKE_C_FLAGS "${ARCH_FLAGS} -std=gnu11 -Wall -ffunction-sections -fdata-sections -Wdouble-promotion")
 set(CMAKE_ASM_FLAGS "${ARCH_FLAGS} -x assembler-with-cpp")
 set(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_CURRENT_BINARY_DIR}/output.map -Wl,--gc-sections -u _printf_float -u _scanf_float -lm")
