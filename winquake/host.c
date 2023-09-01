@@ -818,6 +818,7 @@ void Host_Init (quakeparms_t *parms)
 	R_Init ();
 
 	CDAudio_Init ();
+	S_Init();
 	Sbar_Init ();
 	CL_Init ();
 	IN_Init ();
