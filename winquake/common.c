@@ -1380,6 +1380,7 @@ Allways appends a 0 byte.
 cache_user_t *loadcache;
 byte    *loadbuf;
 int             loadsize;
+int len_for_emu;
 byte *COM_LoadFile (char *path, int usehunk)
 {
 	int             h;
@@ -1393,6 +1394,8 @@ byte *COM_LoadFile (char *path, int usehunk)
 	len = COM_OpenFile (path, &h);
 	if (h == -1)
 		return NULL;
+
+	len_for_emu = len;
 	
 // extract the filename base name for hunk tag
 	COM_FileBase (path, base);
