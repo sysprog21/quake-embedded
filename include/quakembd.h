@@ -58,7 +58,7 @@ typedef struct {
 } key_event_t;
 
 typedef struct {
-	int32_t xrel, yrel;
+	int32_t x, y, xrel, yrel;
 } mouse_motion_t;
 
 typedef struct {
