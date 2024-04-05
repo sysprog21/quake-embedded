@@ -32,6 +32,7 @@ enum {
 	KEY_EVENT = 0,
 	MOUSE_MOTION_EVENT = 1,
 	MOUSE_BUTTON_EVENT = 2,
+	QUIT_EVENT = 3,
 };
 
 typedef struct {
@@ -57,14 +58,23 @@ typedef struct {
 
 enum {
 	RELATIVE_MODE_SUBMISSION = 0,
+	WINDOW_TITLE_SUBMISSION = 1,
 };
+
+typedef struct {
+	uint8_t enabled;
+} mouse_submission_t;
+
+typedef struct {
+	uint32_t title;
+	uint32_t size;
+} title_submission_t;
 
 typedef struct {
 	uint32_t type;
 	union {
-		union {
-			uint8_t enabled;
-		} mouse;
+	   mouse_submission_t mouse;
+	   title_submission_t title;
 	};
 } submission_t;
 
@@ -262,6 +272,9 @@ int qembd_dequeue_key_event(key_event_t *e)
 					break;
 			}
 			return 0;
+		}
+		if (event.type == QUIT_EVENT) {
+			exit(0);
 		}
 	}
 	return -1;
