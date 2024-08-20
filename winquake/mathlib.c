@@ -111,9 +111,6 @@ void BOPS_Error (void)
 	Sys_Error ("BoxOnPlaneSide:  Bad signbits");
 }
 
-
-#if	!id386
-
 /*
 ==================
 BoxOnPlaneSide
@@ -220,9 +217,6 @@ if (sides == 0)
 
 	return sides;
 }
-
-#endif
-
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {

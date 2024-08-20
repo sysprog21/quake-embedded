@@ -44,9 +44,6 @@ void D_StartParticles (void)
 // not used by software driver
 }
 
-
-#if	!id386
-
 /*
 ==============
 D_DrawParticle
@@ -206,6 +203,3 @@ void D_DrawParticle (particle_t *pparticle)
 		break;
 	}
 }
-
-#endif	// !id386
-
