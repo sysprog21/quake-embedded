@@ -483,8 +483,6 @@ void D_PolysetSetUpForLineScan(fixed8_t startvertu, fixed8_t startvertv,
 	int			tm, tn;
 	adivtab_t	*ptemp;
 
-// TODO: implement x86 version
-
 	errorterm = -1;
 
 	tm = endvertu - startvertu;

@@ -33,10 +33,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/filio.h>
 #endif
 
-#ifdef NeXT
-#include <libc.h>
-#endif
-
 #ifdef __APPLE__
 #include <arpa/inet.h>
 #endif
