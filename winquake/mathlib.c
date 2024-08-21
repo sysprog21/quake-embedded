@@ -406,64 +406,6 @@ void R_ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4])
 }
 
 
-/*
-===================
-FloorDivMod
-
-Returns mathematically correct (floor-based) quotient and remainder for
-numer and denom, both of which should contain no fractional part. The
-quotient must fit in 32 bits.
-====================
-*/
-
-static inline int FastFloor(float x)
-{
-#if 0
-	return ((int)(x + 32768.0F)) - 32768;
-#else
-	int i = (int)x;
-	if ((float)i > x)
-		--i;
-	return i;
-#endif
-}
-
-void FloorDivMod (float numer, float denom, int *quotient, int *rem)
-{
-	int		q, r;
-
-#ifdef PARANOID
-	if (denom <= 0.0F)
-		Sys_Error ("FloorDivMod: bad denominator %d\n", (int)denom);
-
-//	if ((floorf(numer) != numer) || (floorf(denom) != denom))
-//		Sys_Error ("FloorDivMod: non-integer numer or denom %f %f\n",
-//				(double)numer, (double)denom);
-#endif
-
-	if (numer >= 0.0F)
-	{
-		q = FastFloor(numer / denom);
-		r = FastFloor(numer - (((float)q) * denom));
-	}
-	else
-	{
-	//
-	// perform operations with positive values, and fix mod to make floor-based
-	//
-		q = -FastFloor(-numer / denom);
-		r = FastFloor(-numer - (((float)(-q)) * denom));
-		if (r != 0)
-		{
-			--q;
-			r = ((int)denom) - r;
-		}
-	}
-
-	*quotient = q;
-	*rem = r;
-}
-
 #define SWAP(x, y, T) do { T SWAP = x; x = y; y = SWAP; } while (0)
 
 /*

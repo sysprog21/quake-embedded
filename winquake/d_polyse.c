@@ -93,15 +93,6 @@ int						d_sfracbasestep, d_tfracbasestep;
 int						d_ziextrastep, d_zibasestep;
 int						d_pzextrastep, d_pzbasestep;
 
-typedef struct {
-	int		quotient;
-	int		remainder;
-} adivtab_t;
-
-static adivtab_t	adivtab[32*32] = {
-#include "adivtab.h"
-};
-
 byte	*skintable[MAX_LBM_HEIGHT];
 int		skinwidth;
 byte	*skinstart;
@@ -473,38 +464,54 @@ void D_PolysetScanLeftEdge (int height)
 
 /*
 ===================
+FloorDivMod
+
+Returns mathematically correct (floor-based) quotient and remainder for
+numer and denom, both of which should contain no fractional part. The
+quotient must fit in 32 bits.
+====================
+*/
+static inline void
+FloorDivMod (int numer, int denom, int *quotient, int *rem)
+{
+        int n = (numer >= 0) ? numer : -numer;
+        int q = n / denom;
+        int r = n - q * denom;
+
+        // For the negative case, fix mod to make floor-based
+        if (numer < 0)
+        {
+                q = -q;
+                if (r != 0)
+                {
+                        q--;
+                        r = denom - r;
+                }
+        }
+
+        *quotient = q;
+        *rem = r;
+}
+
+/*
+===================
 D_PolysetSetUpForLineScan
 ====================
 */
-void D_PolysetSetUpForLineScan(fixed8_t startvertu, fixed8_t startvertv,
+static void
+D_PolysetSetUpForLineScan(fixed8_t startvertu, fixed8_t startvertv,
 		fixed8_t endvertu, fixed8_t endvertv)
 {
-	double		dm, dn;
-	int			tm, tn;
-	adivtab_t	*ptemp;
+	fixed8_t	tm, tn;
 
 	errorterm = -1;
 
 	tm = endvertu - startvertu;
 	tn = endvertv - startvertv;
 
-	if (((tm <= 16) && (tm >= -15)) &&
-		((tn <= 16) && (tn >= -15)))
-	{
-		ptemp = &adivtab[((tm+15) << 5) + (tn+15)];
-		ubasestep = ptemp->quotient;
-		erroradjustup = ptemp->remainder;
-		erroradjustdown = tn;
-	}
-	else
-	{
-		dm = (double)tm;
-		dn = (double)tn;
+	FloorDivMod (tm, tn, &ubasestep, &erroradjustup);
 
-		FloorDivMod (dm, dn, &ubasestep, &erroradjustup);
-
-		erroradjustdown = dn;
-	}
+	erroradjustdown = tn;
 }
 
 /*

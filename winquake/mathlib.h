@@ -74,8 +74,6 @@ void VectorScale (vec3_t in, vec_t scale, vec3_t out);
 void R_ConcatRotations (float in1[3][3], float in2[3][3], float out[3][3]);
 void R_ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4]);
 
-void FloorDivMod (float numer, float denom, int *quotient,
-		int *rem);
 int GreatestCommonDivisor (int i1, int i2);
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
