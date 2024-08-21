@@ -86,19 +86,6 @@ void PerpendicularVector( vec3_t dst, const vec3_t src )
 
 /*-----------------------------------------------------------------*/
 
-
-float	anglemod(float a)
-{
-#if 0
-	if (a >= 0.0F)
-		a -= 360*(int)(a * (1.0F/360.0F));
-	else
-		a += 360*(1 - (int)(a * (1.0F/360.0F)) );
-#endif
-	a = (360.0f/65536.0f) * ((int)(a*(65536.0f/360.0f)) & 65535);
-	return a;
-}
-
 /*
 ==================
 BOPS_Error

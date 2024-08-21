@@ -78,8 +78,17 @@ int GreatestCommonDivisor (int i1, int i2);
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct mplane_s *plane);
-float	anglemod(float a);
 
+/* equivalent to
+ *   if (a >= 0.0F)
+ *       a -= 360 * (int)(a * (1.0F / 360.0F));
+ *   else
+ *       a += 360 * (1 - (int)(a * (1.0F / 360.0F)));
+ */
+static inline float anglemod(float a)
+{
+    return (360.0f/65536.0f) * ((int)(a * (65536.0f/360.0f)) & 65535);
+}
 
 
 #define BOX_ON_PLANE_SIDE(emins, emaxs, p)	\
